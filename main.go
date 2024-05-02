@@ -21,7 +21,8 @@ func init() {
 }
 
 func main() {
-	var cmdArgs []string
+	var argsString []string
+	conf := config.UserConfig()
 
 	arg := os.Args[1]
 	switch arg {
@@ -30,12 +31,13 @@ func main() {
 	default:
 		// pass all other commands to regular git commands
 		// following the bare repo user conf entries
-		// stdinArgs := os.Args[1:]
-		// cmdArgs := append(cmdArgs, gitFlags)
-		// cmdArgs = append(cmdArgs, stdinArgs...)
+		stdinArgs := os.Args[1:]
+		argsString := append(argsString, conf.RepoFlags...)
+		argsString = append(argsString, stdinArgs...)
 
-		cmd := exec.Command("git", cmdArgs...)
+		cmd := exec.Command("git", argsString...)
 		stderr, err := cmd.StderrPipe()
+		stdout, err := cmd.StdoutPipe()
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -45,7 +47,9 @@ func main() {
 		}
 
 		slurp, _ := io.ReadAll(stderr)
+		out, _ := io.ReadAll(stdout)
 		fmt.Printf("%s\n", slurp)
+		fmt.Printf("%s\n", out)
 
 		if err := cmd.Wait(); err != nil {
 			log.Fatal(err)

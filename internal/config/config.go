@@ -5,7 +5,6 @@ import (
 	toml "github.com/pelletier/go-toml/v2"
 	"log"
 	"os"
-	"strings"
 )
 
 var (
@@ -19,7 +18,7 @@ type Config struct {
 	GitDir    string
 	Origin    string
 	Mirror    string
-	RepoFlags string
+	RepoFlags []string
 }
 
 // reads user configuration from a .toml file
@@ -43,8 +42,12 @@ func parseConfig(config []byte) {
 
 // build the bare repo git argument string
 func buildGitRepoFlags(conf *Config) {
-	var v []string
-	v = append(v, conf.GitDir, conf.Worktree)
-	repoFlags := strings.Join(v, " ")
-	conf.RepoFlags = repoFlags
+	var flags []string
+	flags = append(flags, conf.GitDir, conf.Worktree)
+	conf.RepoFlags = flags
+}
+
+func UserConfig() *Config {
+	c := &conf
+	return c
 }
