@@ -1,3 +1,2 @@
-worktree = "$HOME"
-gitdir = "$HOME/test"
-
+worktree = "--work-tree=$HOME"
+gitdir = "--git-dir=$HOME/.tjex-cfg/"

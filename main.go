@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"git.sr.ht/~tjex/dotf/cmd/dotf"
 	"git.sr.ht/~tjex/dotf/internal/config"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -15,24 +16,40 @@ var (
 	logger = log.New(&buf, "logger: ", log.Lshortfile)
 )
 
-func main() {
-	conf := config.OpenConfig("./test/test.toml")
+func init() {
+	config.ReadConfig("./test/test.toml")
+}
 
-	logger.Print(conf)
-	fmt.Println(&buf)
+func main() {
+	var cmdArgs []string
 
 	arg := os.Args[1]
-
 	switch arg {
 	case "push":
 		dotf.Push()
 	default:
-		args := os.Args[1:]
-		cmd, err := exec.Command("git", args...).Output()
+		// pass all other commands to regular git commands
+		// following the bare repo user conf entries
+		// stdinArgs := os.Args[1:]
+		// cmdArgs := append(cmdArgs, gitFlags)
+		// cmdArgs = append(cmdArgs, stdinArgs...)
+
+		cmd := exec.Command("git", cmdArgs...)
+		stderr, err := cmd.StderrPipe()
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Printf("%s", cmd)
+
+		if err := cmd.Start(); err != nil {
+			log.Fatal(err)
+		}
+
+		slurp, _ := io.ReadAll(stderr)
+		fmt.Printf("%s\n", slurp)
+
+		if err := cmd.Wait(); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 }
