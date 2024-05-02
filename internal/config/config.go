@@ -18,7 +18,7 @@ type Config struct {
 	GitDir    string
 	Origin    string
 	Mirror    string
-	RepoFlags []string
+	RepoFlags []string // As a base, targets the bare repo dir and worktree
 }
 
 // reads user configuration from a .toml file
@@ -40,7 +40,7 @@ func parseConfig(config []byte) {
 	buildGitRepoFlags(&conf)
 }
 
-// build the bare repo git argument string
+// build the bare repo git argument array
 func buildGitRepoFlags(conf *Config) {
 	var flags []string
 	flags = append(flags, conf.GitDir, conf.Worktree)

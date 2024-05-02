@@ -21,21 +21,19 @@ func init() {
 }
 
 func main() {
-	var argsString []string
+	var argsArray []string
 	conf := config.UserConfig()
+	argsArray = append(argsArray, conf.RepoFlags...)
 
-	arg := os.Args[1]
-	switch arg {
+	switch os.Args[1] {
 	case "push":
 		dotf.Push()
 	default:
 		// pass all other commands to regular git commands
-		// following the bare repo user conf entries
 		stdinArgs := os.Args[1:]
-		argsString := append(argsString, conf.RepoFlags...)
-		argsString = append(argsString, stdinArgs...)
+		argsArray = append(argsArray, stdinArgs...)
 
-		cmd := exec.Command("git", argsString...)
+		cmd := exec.Command("git", argsArray...)
 		stderr, err := cmd.StderrPipe()
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
