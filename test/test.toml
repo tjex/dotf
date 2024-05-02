@@ -1,0 +1,3 @@
+worktree = "$HOME"
+gitdir = "$HOME/test"
+
