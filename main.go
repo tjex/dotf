@@ -27,9 +27,9 @@ func main() {
 
 	switch os.Args[1] {
 	case "push":
-		dotf.Push()
+		dotf.Push(stdinArgs)
 	default:
-		git.ExecuteRegularGitCmd(stdinArgs)
+		git.ExecuteGitCmd(stdinArgs)
 	}
 
 }

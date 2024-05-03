@@ -1,13 +1,19 @@
 package dotf
 
 import (
-	"fmt"
+	"git.sr.ht/~tjex/dotf/cmd/git"
+
 	"git.sr.ht/~tjex/dotf/internal/config"
 )
 
+var pushArgsOrigin, pushArgsMirror []string
+
 // push to repositories and mirrors simultaneously
-func Push() {
+func Push(stdinArgs []string) {
 	conf := config.UserConfig()
-	fmt.Println(conf)
-	fmt.Println("push from push.go")
+	pushArgsOrigin = append(pushArgsOrigin, "push", conf.RemoteName)
+	pushArgsMirror = append(pushArgsMirror, "push", "--mirror", conf.Mirror)
+
+	git.ExecuteGitCmd(pushArgsOrigin)
+	git.ExecuteGitCmd(pushArgsMirror)
 }

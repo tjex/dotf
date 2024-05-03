@@ -1,3 +1,5 @@
 worktree = "--work-tree=/Users/tjex"
 gitdir = "--git-dir=/Users/tjex/.tjex-cfg/"
 mirror = "git@github.com:tjex/dotfiles.git"
+origin = "git@git.sr.ht:~tjex/dotf"
+remoteName = "origin"

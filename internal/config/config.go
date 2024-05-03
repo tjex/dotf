@@ -19,6 +19,7 @@ type Config struct {
 	Origin    string
 	Mirror    string
 	RepoFlags []string // As a base, targets the bare repo dir and worktree
+    RemoteName string
 }
 
 // reads user configuration from a .toml file

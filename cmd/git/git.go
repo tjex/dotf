@@ -9,14 +9,14 @@ import (
 )
 
 // prepares git command and executes with args passed to function
-func ExecuteRegularGitCmd(stdinArgs []string) {
+func ExecuteGitCmd(gitArgs []string) {
 	conf := config.UserConfig()
 	var argsArray []string
 
 	// force color output
 	argsArray = append(argsArray, "-c", "color.status=always")
 	argsArray = append(argsArray, conf.RepoFlags...)
-	argsArray = append(argsArray, stdinArgs...)
+	argsArray = append(argsArray, gitArgs...)
 
 	cmd := exec.Command("git", argsArray...)
 
