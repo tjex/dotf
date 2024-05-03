@@ -16,7 +16,7 @@ var (
 )
 
 func init() {
-	config.ReadConfig("./internal/config/test.toml")
+	config.ReadConfig("./internal/config/config.toml")
 }
 
 func main() {

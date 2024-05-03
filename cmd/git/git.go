@@ -8,7 +8,7 @@ import (
 )
 
 // prepares git command and executes with args passed to function
-func GitCmdRun(gitArgs []string) {
+func GitCmdRun(gitArgs []string) error {
 	conf := config.UserConfig()
 	var argsArray []string
 
@@ -21,6 +21,9 @@ func GitCmdRun(gitArgs []string) {
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
-	cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+	return nil
 
 }
