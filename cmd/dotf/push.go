@@ -14,6 +14,6 @@ func Push(stdinArgs []string) {
 	pushArgsOrigin = append(pushArgsOrigin, "push", conf.RemoteName)
 	pushArgsMirror = append(pushArgsMirror, "push", "--mirror", conf.Mirror)
 
-	git.ExecuteGitCmd(pushArgsOrigin)
-	git.ExecuteGitCmd(pushArgsMirror)
+	git.GitCmdRun(pushArgsOrigin)
+	git.GitCmdRun(pushArgsMirror)
 }

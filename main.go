@@ -16,7 +16,7 @@ var (
 )
 
 func init() {
-	config.ReadConfig("./test/test.toml")
+	config.ReadConfig("./internal/config/test.toml")
 }
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 	case "push":
 		dotf.Push(stdinArgs)
 	default:
-		git.ExecuteGitCmdRun(stdinArgs)
+		git.GitCmdRun(stdinArgs)
 	}
 
 }
