@@ -1,2 +1,3 @@
 worktree = "--work-tree=/Users/tjex"
 gitdir = "--git-dir=/Users/tjex/.tjex-cfg/"
+mirror = "git@github.com:tjex/dotfiles.git"
