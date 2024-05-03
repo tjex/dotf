@@ -1,15 +1,14 @@
 package git
 
 import (
-	"fmt"
-	"git.sr.ht/~tjex/dotf/internal/config"
-	"io"
-	"log"
+	"os"
 	"os/exec"
+
+	"git.sr.ht/~tjex/dotf/internal/config"
 )
 
 // prepares git command and executes with args passed to function
-func ExecuteGitCmd(gitArgs []string) {
+func GitCmdRun(gitArgs []string) {
 	conf := config.UserConfig()
 	var argsArray []string
 
@@ -19,29 +18,9 @@ func ExecuteGitCmd(gitArgs []string) {
 	argsArray = append(argsArray, gitArgs...)
 
 	cmd := exec.Command("git", argsArray...)
-
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		log.Fatal(err)
-	}
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := cmd.Start(); err != nil {
-		log.Fatal(err)
-	}
-
-	slurpErr, _ := io.ReadAll(stderr)
-	slurpOut, _ := io.ReadAll(stdout)
-
-	fmt.Printf("%s\n", slurpErr)
-	fmt.Printf("%s\n", slurpOut)
-
-	// be sure cmd finishes
-	if err := cmd.Wait(); err != nil {
-		log.Fatal(err)
-	}
+	cmd.Stdout = os.Stdout
+	cmd.Stdin = os.Stdin
+	cmd.Stderr = os.Stderr
+	cmd.Run()
 
 }

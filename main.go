@@ -29,7 +29,7 @@ func main() {
 	case "push":
 		dotf.Push(stdinArgs)
 	default:
-		git.ExecuteGitCmd(stdinArgs)
+		git.ExecuteGitCmdRun(stdinArgs)
 	}
 
 }
