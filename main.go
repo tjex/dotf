@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"log"
 	"os"
@@ -21,7 +22,9 @@ func init() {
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Fatal("No CLI arguments passed")
+		// Same as simply running "git"
+		git.GitCmdRun(nil)
+		return
 	}
 	stdinArgs := os.Args[1:]
 
@@ -29,7 +32,10 @@ func main() {
 	case "push":
 		dotf.Push(stdinArgs)
 	default:
-		git.GitCmdRun(stdinArgs)
+		out := git.GitCmdRun(stdinArgs)
+		f := bufio.NewWriter(os.Stdout)
+		defer f.Flush()
+		f.Write(out.Bytes())
 	}
 
 }
