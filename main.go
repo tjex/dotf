@@ -20,14 +20,16 @@ func init() {
 }
 
 func main() {
+	if len(os.Args) < 2 {
+		log.Fatal("No CLI arguments passed")
+	}
 	stdinArgs := os.Args[1:]
 
 	switch os.Args[1] {
 	case "push":
 		dotf.Push()
 	default:
-		// pass all other commands to regular git commands
-		git.ExecuteGitCmd(stdinArgs)
+		git.ExecuteRegularGitCmd(stdinArgs)
 	}
 
 }
