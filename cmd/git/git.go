@@ -1,7 +1,6 @@
 package git
 
 import (
-	"bytes"
 	"fmt"
 	"git.sr.ht/~tjex/dotf/internal/config"
 	"io"
@@ -9,36 +8,37 @@ import (
 	"os/exec"
 )
 
-var (
-	buf       bytes.Buffer
-	logger    = log.New(&buf, "logger: ", log.Lshortfile)
-	argsArray []string
-)
-
-// prepares bare repo flags for git command and executes
-// with provided args
+// prepares git command and executes with args passed to function
 func ExecuteGitCmd(args []string) {
 	conf := config.UserConfig()
-	argsArray := append(argsArray, conf.RepoFlags...)
+	var argsArray []string
+
+	// force color output
+	argsArray = append(argsArray, "-c", "color.status=always")
+	argsArray = append(argsArray, conf.RepoFlags...)
 	argsArray = append(argsArray, args...)
 
 	cmd := exec.Command("git", argsArray...)
 
 	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
 	if err := cmd.Start(); err != nil {
 		log.Fatal(err)
 	}
+	slurpErr, _ := io.ReadAll(stderr)
+	slurpOut, _ := io.ReadAll(stdout)
 
-	slurp, _ := io.ReadAll(stderr)
-	out, _ := io.ReadAll(stdout)
-	fmt.Printf("%s\n", slurp)
-	fmt.Printf("%s\n", out)
+	fmt.Printf("%s\n", slurpErr)
+	fmt.Printf("%s\n", slurpOut)
 
+	// be sure cmd finishes
 	if err := cmd.Wait(); err != nil {
 		log.Fatal(err)
 	}
