@@ -1,5 +1,5 @@
-worktree = "--work-tree=/Users/tjex/dev/bare-repo-test/"
-gitdir = "--git-dir=/Users/tjex/dev/bare-repo-test/repo/"
+worktree = "--work-tree=/Users/tjex/dev/bare-repo-test"
+gitdir = "--git-dir=/Users/tjex/dev/bare-repo-test/repo"
 mirror = "git@git.sr.ht:~tjex/mirror-test"
 origin = "git@git.sr.ht:~tjex/srht-playground"
 remoteName = "origin"
