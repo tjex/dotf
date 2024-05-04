@@ -1,6 +1,7 @@
 package git
 
 import (
+	"bytes"
 	"log"
 	"os"
 	"os/exec"
@@ -8,6 +9,7 @@ import (
 	"git.sr.ht/~tjex/dotf/internal/config"
 )
 
+// Execute a git command with passed arguments
 func GitCmdExecute(gitArgs []string) {
 	argsArray := buildArgsArray(gitArgs)
 	cmd := exec.Command("git", argsArray...)
@@ -20,6 +22,25 @@ func GitCmdExecute(gitArgs []string) {
 
 }
 
+// Execute git command, but write output to buffer and return
+// (for handling via channels)
+func GitCmdExecuteRoutine(gitArgs []string) string {
+	var out bytes.Buffer
+	argsArray := buildArgsArray(gitArgs)
+	cmd := exec.Command("git", argsArray...)
+	cmd.Stdout = &out
+	cmd.Stdin = os.Stdin
+	// cmd.Stderr = os.Stderr was writing regular messages to stdout
+	// (e.g. printing normal git messages to terminal)?...
+	cmd.Stderr = &out
+	if err := cmd.Run(); err != nil {
+		log.Fatal(err)
+	}
+
+	return out.String()
+}
+
+// Build the arguments array for subsequent git calls
 func buildArgsArray(gitArgs []string) []string {
 	conf := config.UserConfig()
 	var argsArray []string
