@@ -35,7 +35,6 @@ func ReadUserConfig() {
 	path := configDir()
 	confFile := filepath.Join(path, "config.toml")
 	file, err := os.ReadFile(confFile)
-	log.Print(confFile)
 	if err != nil {
 		logger.Print(err)
 	}

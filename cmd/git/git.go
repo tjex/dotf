@@ -20,7 +20,6 @@ func GitCmdRun(gitArgs []string) bytes.Buffer {
 	argsArray = append(argsArray, conf.RepoFlags...)
 	argsArray = append(argsArray, gitArgs...)
 
-    log.Print(argsArray)
 	cmd := exec.Command("git", argsArray...)
 	cmd.Stdout = &out // write stdout to buffer for grouping output between concurrent prints
 	cmd.Stdin = os.Stdin

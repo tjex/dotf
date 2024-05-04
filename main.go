@@ -28,7 +28,6 @@ func main() {
 		return
 	}
 	stdinArgs := os.Args[1:]
-	log.Println(stdinArgs)
 
 	switch os.Args[1] {
 	case "push":
