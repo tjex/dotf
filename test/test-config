@@ -1,0 +1,41 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = true
+	ignorecase = true
+	precomposeunicode = true
+[status]
+	showUntrackedFiles = no
+[remote "origin"]
+	url = git@git.sr.ht:~tjex/dotfiles
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "mac"]
+	remote = origin
+	merge = refs/heads/mac
+[branch "blank"]
+	remote = origin
+	merge = refs/heads/blank
+[branch "linux"]
+	remote = origin
+	merge = refs/heads/linux
+[submodule "/Users/tjex/.config/asciinema"]
+	url = git@git.sr.ht:~tjex/asciinema-conf
+	active = true
+[submodule "/Users/tjex/.config/aerc"]
+	url = git@git.sr.ht:~tjex/aerc-conf
+	active = true
+[submodule "/Users/tjex/.config/goimap"]
+	url = git@git.sr.ht:~tjex/goimap-conf
+	active = true
+[submodule "/Users/tjex/.config/mbsync"]
+	url = git@git.sr.ht:~tjex/mbsync-conf
+	active = true
+[submodule "/Users/tjex/.config/msmtp"]
+	url = git@git.sr.ht:~tjex/msmtp-conf
+	active = true
+[submodule "/Users/tjex/.scripts"]
+	url = git@git.sr.ht:~tjex/scripts
+	active = true
+[submodule "/Users/tjex/.abook"]
+	url = git@git.sr.ht:~tjex/abook-conf
+	active = true
