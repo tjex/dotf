@@ -4,13 +4,10 @@ A little git wrapper to make some dotfile operations more convenient.
 
 ## config
 
-Configuration is done by editing the `config.toml` file in `internal/config`.
-Currently `dotf` gets built with the configuration you set.
+`dotf` looks for configuration in `${XDG_CONFIG_HOME}/dotf/config.toml`.
 
 As an example, these settings are in keeping with the
 [bare repo dotfiles tutorial on Atlassian](https://www.atlassian.com/git/tutorials/dotfiles)
-
-`/internal/config/config.toml`
 
 ```toml
 worktree = "--work-tree=/Users/<user>" # note: must be absolute path (and no $HOME, etc)
