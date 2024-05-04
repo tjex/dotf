@@ -1,18 +1,22 @@
 package config
 
 import (
+	"bufio"
 	"bytes"
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	toml "github.com/pelletier/go-toml/v2"
 )
 
 var (
-	buf    bytes.Buffer
-	logger = log.New(&buf, "logger: ", log.Lshortfile)
-	conf   Config
+	buf        bytes.Buffer
+	logger     = log.New(&buf, "logger: ", log.Lshortfile)
+	conf       Config
+	submLineRe = regexp.MustCompile(`^\[submodule ".+?"\]`)
+	submPathRe = regexp.MustCompile(`"(.+?)"`)
 )
 
 type Config struct {
@@ -68,4 +72,35 @@ func configDir() string {
 		path = filepath.Join(home, ".config")
 	}
 	return filepath.Join(path, "dotf")
+}
+
+// Retrieve path to bare repo git config
+func GitConfig() string {
+	conf := UserConfig()
+	gitDir := conf.GitDir
+	gitConf := filepath.Join(gitDir, "config")
+	return gitConf
+
+}
+
+// Extracts submodule paths from bare repo git config
+func SubmodulePaths(filepath string) []string {
+	var configLines, submodulePaths []string
+	file, err := os.Open(filepath)
+	if err != nil {
+		log.Println("error opening bare repository config:", err)
+	}
+	defer file.Close()
+	sc := bufio.NewScanner(file)
+	for sc.Scan() {
+		configLines = append(configLines, sc.Text())
+	}
+	for _, line := range configLines {
+		match := submLineRe.FindString(line)
+		submodulePath := submPathRe.FindString(match)
+		submodulePaths = append(submodulePaths, submodulePath)
+	}
+
+	return submodulePaths
+
 }
