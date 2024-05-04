@@ -16,16 +16,15 @@ func Push(stdinArgs []string) {
 	pushArgsOrigin = append(pushArgsOrigin, "push", conf.RemoteName)
 	pushArgsMirror = append(pushArgsMirror, "push", "--mirror", conf.Mirror)
 
-	wg.Add(1)
+	wg.Add(2)
 	go func() {
-		defer wg.Done()
 		git.GitCmdExecute(pushArgsOrigin)
+		wg.Done()
 	}()
 
-	wg.Add(1)
 	go func() {
-		defer wg.Done()
 		git.GitCmdExecute(pushArgsMirror)
+		wg.Done()
 	}()
 
 	wg.Wait()

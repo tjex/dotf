@@ -8,11 +8,10 @@ import (
 	"git.sr.ht/~tjex/dotf/internal/config"
 )
 
-
 func GitCmdExecute(gitArgs []string) {
 	argsArray := buildArgsArray(gitArgs)
 	cmd := exec.Command("git", argsArray...)
-	cmd.Stdout = os.Stdout // write stdout to buffer for grouping output between concurrent prints
+	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
