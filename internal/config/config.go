@@ -54,7 +54,7 @@ func parseConfig(config []byte) {
 // build the bare repo git argument array
 func buildGitRepoFlags(conf *Config) {
 	var flags []string
-	flags = append(flags, conf.GitDir, conf.Worktree)
+	flags = append(flags, "--git-dir", conf.GitDir, "--work-tree", conf.Worktree)
 	conf.RepoFlags = flags
 }
 
@@ -69,4 +69,3 @@ func configDir() string {
 	}
 	return filepath.Join(path, "dotf")
 }
-
