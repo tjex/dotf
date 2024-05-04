@@ -17,24 +17,24 @@ func GitCmdExecute(gitArgs []string) {
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		log.Fatal(err)
+		log.Fatal("GitCmdExecute exited with an error")
 	}
 
 }
 
 // Execute git command, but write output to buffer and return
-// (for handling via channels)
+// (for handling via channels). Can only be used where plain output suffices.
 func GitCmdExecuteRoutine(gitArgs []string) string {
 	var out bytes.Buffer
 	argsArray := buildArgsArray(gitArgs)
+	// cmd.Stderr = os.Stderr was writing regular messages to stdout
+	// (e.g. printing normal git messages to terminal)?...
 	cmd := exec.Command("git", argsArray...)
 	cmd.Stdout = &out
 	cmd.Stdin = os.Stdin
-	// cmd.Stderr = os.Stderr was writing regular messages to stdout
-	// (e.g. printing normal git messages to terminal)?...
 	cmd.Stderr = &out
 	if err := cmd.Run(); err != nil {
-		log.Fatal(err)
+		log.Fatal("GitCmdExecuteRoutine exited with an error")
 	}
 
 	return out.String()
