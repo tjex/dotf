@@ -68,5 +68,5 @@ func configDir() string {
 		path = filepath.Join(home, ".config")
 	}
 	return filepath.Join(path, "dotf")
-
 }
+

@@ -1,7 +1,7 @@
 package dotf
 
 import (
-	"fmt"
+	"sync"
 
 	"git.sr.ht/~tjex/dotf/cmd/git"
 	"git.sr.ht/~tjex/dotf/internal/config"
@@ -12,21 +12,22 @@ var pushArgsOrigin, pushArgsMirror []string
 // push to repositories and mirrors simultaneously
 func Push(stdinArgs []string) {
 	conf := config.UserConfig()
-	c1 := make(chan string)
+	var wg sync.WaitGroup
 	pushArgsOrigin = append(pushArgsOrigin, "push", conf.RemoteName)
 	pushArgsMirror = append(pushArgsMirror, "push", "--mirror", conf.Mirror)
 
+	wg.Add(1)
 	go func() {
-		// not caring about printing err as git is reporting itself
-		out := git.GitCmdRun(pushArgsOrigin)
-		fmt.Println("repository:", conf.Origin)
-		c1 <- out.String()
+		defer wg.Done()
+		git.GitCmdExecute(pushArgsOrigin)
 	}()
 
+	wg.Add(1)
 	go func() {
-		out := git.GitCmdRun(pushArgsMirror)
-		c1 <- out.String()
+		defer wg.Done()
+		git.GitCmdExecute(pushArgsMirror)
 	}()
-	<-c1
+
+	wg.Wait()
 
 }

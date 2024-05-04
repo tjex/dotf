@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"log"
 	"os"
@@ -24,7 +23,7 @@ func init() {
 func main() {
 	if len(os.Args) < 2 {
 		// Same as simply running "git"
-		git.GitCmdRun(nil)
+		git.GitCmdExecute(nil)
 		return
 	}
 	stdinArgs := os.Args[1:]
@@ -33,10 +32,7 @@ func main() {
 	case "push":
 		dotf.Push(stdinArgs)
 	default:
-		out := git.GitCmdRun(stdinArgs)
-		f := bufio.NewWriter(os.Stdout)
-		defer f.Flush()
-		f.Write(out.Bytes())
+		git.GitCmdExecute(stdinArgs)
 	}
 
 }
