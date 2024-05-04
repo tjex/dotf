@@ -10,8 +10,8 @@ As an example, these settings are in keeping with the
 [bare repo dotfiles tutorial on Atlassian](https://www.atlassian.com/git/tutorials/dotfiles)
 
 ```toml
-worktree = "--work-tree=/Users/<user>" # note: must be absolute path (and no $HOME, etc)
-gitdir = "--git-dir=/Users/<user>/.cfg/"
+worktree = "/Users/<user>" # note: must be absolute path (and no $HOME, etc.. yet)
+gitdir = "/Users/<user>/.cfg/"
 mirror = "ssh read/write url for mirror"
 origin = "<ssh read/write url for origin>" # eg, git@git.sr.ht:~tjex/dotfiles
 remoteName = "<remote name>" # eg, origin, remote, etc
