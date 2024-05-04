@@ -2,9 +2,11 @@ package config
 
 import (
 	"bytes"
-	toml "github.com/pelletier/go-toml/v2"
 	"log"
 	"os"
+	"path/filepath"
+
+	toml "github.com/pelletier/go-toml/v2"
 )
 
 var (
@@ -14,17 +16,26 @@ var (
 )
 
 type Config struct {
-	Worktree  string
-	GitDir    string
-	Origin    string
-	Mirror    string
-	RepoFlags []string // As a base, targets the bare repo dir and worktree
-    RemoteName string
+	Worktree   string
+	GitDir     string
+	Origin     string
+	Mirror     string
+	RepoFlags  []string // As a base, targets the bare repo dir and worktree
+	RemoteName string
+}
+
+// returns pointer to user config struct
+func UserConfig() *Config {
+	c := &conf
+	return c
 }
 
 // reads user configuration from a .toml file
-func ReadConfig(path string) {
-	file, err := os.ReadFile(path)
+func ReadUserConfig() {
+	path := configDir()
+	confFile := filepath.Join(path, "config.toml")
+	file, err := os.ReadFile(confFile)
+	log.Print(confFile)
 	if err != nil {
 		logger.Print(err)
 	}
@@ -48,7 +59,15 @@ func buildGitRepoFlags(conf *Config) {
 	conf.RepoFlags = flags
 }
 
-func UserConfig() *Config {
-	c := &conf
-	return c
+func configDir() string {
+	path, ok := os.LookupEnv("XDG_CONFIG_HOME")
+	if !ok {
+		home, ok := os.LookupEnv("HOME")
+		if !ok {
+			home = "~/"
+		}
+		path = filepath.Join(home, ".config")
+	}
+	return filepath.Join(path, "dotf")
+
 }

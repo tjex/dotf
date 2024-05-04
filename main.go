@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"log"
 	"os"
 
@@ -18,14 +17,7 @@ var (
 )
 
 func init() {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		log.Println("error getting home directory", err)
-	}
-	confDefaultPath := home + "/config/dotf/config.toml"
-	fmt.Println(confDefaultPath)
-	// FIXME: can't read conf from XDG_CONFIG_HOME...
-	config.ReadConfig("./internal/config/config.toml")
+	config.ReadUserConfig()
 
 }
 
