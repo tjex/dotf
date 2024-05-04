@@ -31,6 +31,8 @@ func main() {
 	switch os.Args[1] {
 	case "push":
 		dotf.Push(stdinArgs)
+	case "sync":
+		dotf.Sync()
 	default:
 		git.GitCmdExecute(stdinArgs)
 	}
