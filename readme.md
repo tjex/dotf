@@ -5,7 +5,7 @@ convenient.
 
 ## Config
 
-`dotf` looks for configuration in `${XDG_CONFIG_HOME}/dotf/config.toml`.
+`dotf` expects to find a config file at `${XDG_CONFIG_HOME}/dotf/config.toml`.
 
 The below settings are for demonstration in keeping with the
 [bare repo dotfiles tutorial on Atlassian](https://www.atlassian.com/git/tutorials/dotfiles)
