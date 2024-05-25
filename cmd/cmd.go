@@ -9,17 +9,18 @@ import (
 	"git.sr.ht/~tjex/dotf/internal/config"
 )
 
+// A regular exec.Command but stdout and stderr merged and returned as strings.
 func Cmd(name string, args []string) string {
-    var out bytes.Buffer
+	var out bytes.Buffer
 	cmd := exec.Command(name, args...)
 	cmd.Stdout = &out
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = &out
 	if err := cmd.Run(); err != nil {
-		log.Fatal("osCmd exited with an error")
+		log.Fatal(cmd.Stderr)
 	}
 
-    return out.String()
+	return out.String()
 }
 
 // A dotf command is a git command with flags set as per the user's
@@ -33,7 +34,7 @@ func DotfExecute(gitArgs []string) {
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		log.Fatal("DotfCmdExecute exited with an error")
+		log.Fatal(cmd.Stderr)
 	}
 
 }
@@ -50,7 +51,7 @@ func DotfExecuteRoutine(gitArgs []string) string {
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = &out
 	if err := cmd.Run(); err != nil {
-		log.Fatal("DotfCmdExecuteRoutine exited with an error")
+		log.Fatal(cmd.Stderr)
 	}
 
 	return out.String()

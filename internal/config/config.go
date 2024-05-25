@@ -15,7 +15,7 @@ import (
 var (
 	buf        bytes.Buffer
 	logger     = log.New(&buf, "logger: ", log.Lshortfile)
-	conf       Config
+	cfg        Config
 	submLineRe = regexp.MustCompile(`^\[submodule ".+?"\]`)
 	submPathRe = regexp.MustCompile(`"(.+?)"`)
 )
@@ -31,7 +31,7 @@ type Config struct {
 
 // returns pointer to user config struct
 func UserConfig() *Config {
-	c := &conf
+	c := &cfg
 	return c
 }
 
@@ -49,18 +49,18 @@ func ReadUserConfig() {
 
 // parse a .toml file for usage.
 func parseConfig(config []byte) {
-	err := toml.Unmarshal(config, &conf)
+	err := toml.Unmarshal(config, &cfg)
 	if err != nil {
 		logger.Print(err)
 	}
-	buildGitRepoFlags(&conf)
+	buildGitRepoFlags(&cfg)
 }
 
 // build the bare repo git argument array
-func buildGitRepoFlags(conf *Config) {
+func buildGitRepoFlags(cfg *Config) {
 	var flags []string
-	flags = append(flags, "--git-dir", conf.GitDir, "--work-tree", conf.Worktree)
-	conf.RepoFlags = flags
+	flags = append(flags, "--git-dir", cfg.GitDir, "--work-tree", cfg.Worktree)
+	cfg.RepoFlags = flags
 }
 
 func configDir() string {
@@ -76,18 +76,17 @@ func configDir() string {
 }
 
 // Retrieve path to bare repo git config
-func GitConfig() string {
-	conf := UserConfig()
-	gitDir := conf.GitDir
-	gitConf := filepath.Join(gitDir, "config")
+func BareRepoConfig() string {
+	gitConf := filepath.Join(cfg.GitDir, "config")
 	return gitConf
 
 }
 
 // Extracts submodule paths from bare repo git config
-func SubmodulePaths(filepath string) []string {
+func Submodules() []string {
 	var configLines, submodulePaths []string
-	file, err := os.Open(filepath)
+	conf := BareRepoConfig()
+	file, err := os.Open(conf)
 	if err != nil {
 		log.Println("error opening bare repository config:", err)
 	}

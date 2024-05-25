@@ -31,8 +31,8 @@ func main() {
 	switch os.Args[1] {
 	case "push":
 		dotf.Push(stdinArgs)
-	case "sync":
-		dotf.Sync()
+	case "prime":
+		dotf.CleanAllDirtySubmodules()
 	default:
 		cmd.DotfExecute(stdinArgs)
 	}
