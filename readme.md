@@ -14,17 +14,26 @@ worktree = "/Users/<user>" # note: must be absolute path (and no $HOME, etc.. ye
 gitdir = "/Users/<user>/.cfg/"
 mirror = "ssh read/write url for mirror"
 origin = "<ssh read/write url for origin>" # eg, git@git.sr.ht:~tjex/dotfiles
-remoteName = "<remote name>" # eg, origin, remote, etc
+batch-commit-message = "batch dotf update" # used by `dotf prime`
 ```
 
 ## usage
 
-`dotf push` will push to origin and mirror concurrently.
+All `git` commands are passed as normal. Some are intercepted and handled
+differently, some are unique:
 
-All other regular `git` commands will be passed to git as normal.
+`push` - push to origin and mirror concurrently. `prime` - add (via
+`git add -u`) and commit all changes to all submodules. Commit message is set in
+`config.toml`
 
-## that's it?
+A regular workflow would then look like the following. From anywhere in your
+file system:
 
-For now yes. But I want to implement a concurrent submodule sync feature.
+```bash
+dotf add -u
+dotf commit -m "add all unstaged changes to tracked files"
 
-Note: This is as much a learning task as it is a valuable tool...
+dotf prime
+
+dotf push
+```
