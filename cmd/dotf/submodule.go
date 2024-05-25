@@ -1,7 +1,6 @@
 package dotf
 
 import (
-	"fmt"
 	"strconv"
 
 	"git.sr.ht/~tjex/dotf/cmd"
@@ -21,7 +20,6 @@ func CleanAllDirtySubmodules() {
 		status := []string{"-C", s, "status", "--porcelain"}
 		out := cmd.Cmd("git", status)
 		// clean submodule repos return an empty string
-		fmt.Println(batchCommit)
 		if out != "" {
 			cmd.Cmd("git", add)
 			cmd.Cmd("git", batchCommit)
