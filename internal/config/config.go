@@ -3,6 +3,7 @@ package config
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -39,6 +40,10 @@ func UserConfig() *Config {
 func ReadUserConfig() {
 	path := configDir()
 	confFile := filepath.Join(path, "config.toml")
+	if _, err := os.Stat(confFile); os.IsNotExist(err) {
+		fmt.Println("No config file at \"XDG_CONFIG_HOME/dotf/config.toml\", does it exist?")
+		os.Exit(1)
+	}
 	file, err := os.ReadFile(confFile)
 	if err != nil {
 		logger.Print(err)
