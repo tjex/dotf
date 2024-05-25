@@ -3,7 +3,7 @@ package dotf
 import (
 	"fmt"
 
-	"git.sr.ht/~tjex/dotf/cmd/git"
+	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/internal/config"
 )
 
@@ -15,16 +15,15 @@ func Push(stdinArgs []string) {
 	pushArgsOrigin = append(pushArgsOrigin, "push", conf.RemoteName)
 	pushArgsMirror = append(pushArgsMirror, "push", "--mirror", conf.Mirror)
 
-
 	c1 := make(chan string)
 	c2 := make(chan string)
 	go func() {
-		out := git.GitCmdExecuteRoutine(pushArgsOrigin)
+		out := cmd.DotfExecuteRoutine(pushArgsOrigin)
 		c1 <- out
 	}()
 
 	go func() {
-		out := git.GitCmdExecuteRoutine(pushArgsMirror)
+		out := cmd.DotfExecuteRoutine(pushArgsMirror)
 		c2 <- out
 	}()
 

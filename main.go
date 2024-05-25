@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
+	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/cmd/dotf"
-	"git.sr.ht/~tjex/dotf/cmd/git"
 	"git.sr.ht/~tjex/dotf/internal/config"
 )
 
@@ -23,7 +23,7 @@ func init() {
 func main() {
 	if len(os.Args) < 2 {
 		// Same as simply running "git"
-		git.GitCmdExecute(nil)
+		cmd.DotfExecute(nil)
 		return
 	}
 	stdinArgs := os.Args[1:]
@@ -34,7 +34,7 @@ func main() {
 	case "sync":
 		dotf.Sync()
 	default:
-		git.GitCmdExecute(stdinArgs)
+		cmd.DotfExecute(stdinArgs)
 	}
 
 }

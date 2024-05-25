@@ -98,7 +98,9 @@ func SubmodulePaths(filepath string) []string {
 	for _, line := range configLines {
 		match := submLineRe.FindString(line)
 		submodulePath := submPathRe.FindString(match)
-		submodulePaths = append(submodulePaths, submodulePath)
+		if submodulePath != "" {
+			submodulePaths = append(submodulePaths, submodulePath)
+		}
 	}
 
 	return submodulePaths
