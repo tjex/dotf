@@ -12,7 +12,7 @@ var pushArgsOrigin, pushArgsMirror []string
 // push to repositories and mirrors simultaneously
 func Push(stdinArgs []string) {
 	conf := config.UserConfig()
-	pushArgsOrigin = append(pushArgsOrigin, "push", conf.RemoteName)
+	pushArgsOrigin = append(pushArgsOrigin, "push")
 	pushArgsMirror = append(pushArgsMirror, "push", "--mirror", conf.Mirror)
 
 	c1 := make(chan string)

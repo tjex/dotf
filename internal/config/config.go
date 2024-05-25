@@ -21,12 +21,12 @@ var (
 )
 
 type Config struct {
-	Worktree   string
-	GitDir     string
-	Origin     string
-	Mirror     string
-	RepoFlags  []string // As a base, targets the bare repo dir and worktree
-	RemoteName string
+	Worktree           string
+	GitDir             string `toml:"git-dir"`
+	Origin             string
+	Mirror             string
+	RepoFlags          []string // Flags for bare repo dir and worktree
+	BatchCommitMessage string   `toml:"batch-commit-message"`
 }
 
 // returns pointer to user config struct
