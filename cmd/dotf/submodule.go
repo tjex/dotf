@@ -16,7 +16,7 @@ func CleanAllDirtySubmodules() {
 
 	for _, s := range submodulePaths {
 		status := []string{"-C", s, "status", "--porcelain"}
-		add := []string{"-C", s, "add", "-u"}
+		add := []string{"-C", s, "add", "-A"}
 		batchCommit := []string{"-C", s, "commit", "-m", message}
 		report := cmd.Cmd("git", status)
 		// clean submodule repos return an empty string
