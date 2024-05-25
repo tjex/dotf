@@ -9,9 +9,10 @@ import (
 
 // Add and commit any unstaged changes in all submodules
 func CleanAllDirtySubmodules() {
-    cfg := config.UserConfig()
-    add := []string{"add", "."}
-    batchCommit := []string{"commit", "-m", cfg.BatchCommitMessage}
+	cfg := config.UserConfig()
+	message := cfg.BatchCommitMessage
+	add := []string{"add", "."}
+	batchCommit := []string{"commit", "-m", message}
 	submodulePaths := config.Submodules()
 	for _, s := range submodulePaths {
 		status := []string{"-C", s, "status", "--porcelain"}
