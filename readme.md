@@ -1,6 +1,6 @@
 # dotf
 
-A `git` wrapper to make dotfile tracking with a bare git repository even more
+A `git` wrapper to make tracking dotfiles with a bare git repository even more
 convenient.
 
 ## Config
@@ -47,4 +47,3 @@ dotf log --oneline
 dotf rebase -i HEAD~2
 ...
 ```
-
