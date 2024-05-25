@@ -13,14 +13,14 @@ func CleanAllDirtySubmodules() {
 	cfg := config.UserConfig()
 
 	message := strconv.Quote(cfg.BatchCommitMessage)
-	add := []string{"add", "."}
-	batchCommit := []string{"commit", "-m", message}
 
 	for _, s := range submodulePaths {
 		status := []string{"-C", s, "status", "--porcelain"}
-		out := cmd.Cmd("git", status)
+		add := []string{"-C", s, "add", "."}
+		batchCommit := []string{"-C", s, "commit", "-m", message}
+		report := cmd.Cmd("git", status)
 		// clean submodule repos return an empty string
-		if out != "" {
+		if report != "" {
 			cmd.Cmd("git", add)
 			cmd.Cmd("git", batchCommit)
 		}
