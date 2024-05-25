@@ -9,6 +9,16 @@ import (
 	"git.sr.ht/~tjex/dotf/internal/config"
 )
 
+func Cmd(name string, args []string) {
+	cmd := exec.Command(name, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stdin = os.Stdin
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		log.Fatal("osCmd exited with an error")
+	}
+}
+
 // A dotf command is a git command with flags set as per the user's
 // bare git repository specs
 

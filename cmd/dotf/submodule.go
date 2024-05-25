@@ -11,6 +11,6 @@ func Sync() {
 
 	for _, s := range submodulePaths {
 		status := []string{"-C", s, "status"}
-		cmd.DotfExecute(status)
+		cmd.Cmd("git", status)
 	}
 }

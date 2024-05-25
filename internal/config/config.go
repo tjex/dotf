@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	toml "github.com/pelletier/go-toml/v2"
 )
@@ -99,6 +100,7 @@ func SubmodulePaths(filepath string) []string {
 		match := submLineRe.FindString(line)
 		submodulePath := submPathRe.FindString(match)
 		if submodulePath != "" {
+			submodulePath = strings.ReplaceAll(submodulePath, `"`, "")
 			submodulePaths = append(submodulePaths, submodulePath)
 		}
 	}
