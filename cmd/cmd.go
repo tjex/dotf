@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"log"
 	"os"
 	"os/exec"
 
@@ -16,10 +15,7 @@ func Cmd(name string, args []string) string {
 	cmd.Stdout = &out
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = &out
-	if err := cmd.Run(); err != nil {
-		log.Fatal(cmd.Stderr)
-	}
-
+	cmd.Run() // errors are returned and handled by git itself
 	return out.String()
 }
 
@@ -33,9 +29,7 @@ func DotfExecute(gitArgs []string) {
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		log.Fatal(cmd.Stderr)
-	}
+	cmd.Run() // errors are returned and handled by git itself
 
 }
 
@@ -50,9 +44,7 @@ func DotfExecuteRoutine(gitArgs []string) string {
 	cmd.Stdout = &out
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = &out
-	if err := cmd.Run(); err != nil {
-		log.Fatal(cmd.Stderr)
-	}
+	cmd.Run() // errors are returned and handled by git itself
 
 	return out.String()
 }
