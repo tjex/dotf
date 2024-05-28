@@ -87,8 +87,8 @@ func BareRepoConfig() string {
 
 }
 
-// Extracts submodule paths from bare repo git config
-func Submodules() []string {
+// Extracts submodule paths from bare repo git config and returns as pointer.
+func Submodules() *[]string {
 	var configLines, submodulePaths []string
 	conf := BareRepoConfig()
 	file, err := os.Open(conf)
@@ -109,6 +109,6 @@ func Submodules() []string {
 		}
 	}
 
-	return submodulePaths
+	return &submodulePaths
 
 }
