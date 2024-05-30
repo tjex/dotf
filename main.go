@@ -27,16 +27,15 @@ var args struct {
 func main() {
 	config.ReadUserConfig()
 	stdinArgs := os.Args[1:]
-	p, err := arg.NewParser(arg.Config{}, &args)
+	p, err := arg.NewParser(arg.Config{Program: "dotf", Exit: os.Exit}, &args)
 	if err != nil {
 		fmt.Println(err)
 	}
-	err = p.Parse(stdinArgs)
 
 	if len(os.Args) < 2 {
 		// Print dotf help if no subcommands given
 		p.WriteHelp(os.Stdout)
-		return
+		os.Exit(0)
 	}
 
 	switch {
@@ -54,7 +53,7 @@ func main() {
 		}
 	default:
 		// If arguments above aren't called, nor is `--help`
-		if arg.ErrHelp == nil {
+		if os.Args[1] != "--help" && os.Args[1] != "-h" {
 			cmd.DotfExecute(stdinArgs)
 		} else {
 			var choice string
