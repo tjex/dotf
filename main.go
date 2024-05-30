@@ -38,6 +38,8 @@ func main() {
 		os.Exit(0)
 	}
 
+	p.Parse(stdinArgs)
+
 	switch {
 	case args.Push != nil:
 		dotf.Push(args.Push.Remote)
