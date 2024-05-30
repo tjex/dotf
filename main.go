@@ -57,7 +57,7 @@ func main() {
 			cmd.DotfExecute(stdinArgs)
 		} else {
 			var choice string
-			fmt.Println("Display help for dotf (d) or git (g)?")
+			fmt.Println("dotf wraps around git. \nDisplay help for dotf (d) or git (g)?")
 			fmt.Scan(&choice)
 			switch {
 			case choice == "d":
