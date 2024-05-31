@@ -2,7 +2,6 @@ package dotf
 
 import (
 	"fmt"
-	"strconv"
 
 	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/internal/config"
@@ -13,7 +12,7 @@ func Prime() {
 	submodulePaths := config.Submodules()
 	cfg := config.UserConfig()
 
-	message := strconv.Quote(cfg.BatchCommitMessage)
+	message := cfg.BatchCommitMessage
 
 	for _, s := range *submodulePaths {
 		status := []string{"-C", s, "status", "--porcelain"}
