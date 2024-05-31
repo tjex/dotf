@@ -23,6 +23,18 @@ For example, my config
 
 ## Installation
 
+1. Clone this repo
+   1. To install with the latest changes: `go install`
+   2. To install with a stable version:
+      `git checkout tags/<version> && go install`
+
+To get version tags, first fetch all tags with `git fetch --all --tags` and then
+run`git tag`.
+
+This repo is also mirrored on GitHub, where
+[releases](https://github.com/tjex/dotf/releases) and
+[tags](https://github.com/tjex/dotf/tags) can be viewed.
+
 ## Usage
 
 All `git` commands are passed as normal. Some are intercepted and handled
