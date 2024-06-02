@@ -1,0 +1,11 @@
+image: alpine/edge
+secrets:
+  - 6f71e0f7-b242-4c20-8aaf-e838719fc3de    # Set your UUID here!
+environment:
+  REPO: dotf
+  GH_USER: tjex
+tasks:
+  - push-to-github: |
+      cd ~/"${REPO}"
+      git config --global credential.helper store
+      git push --mirror "https://github.com/${GH_USER}/${REPO}"
