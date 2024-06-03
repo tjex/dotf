@@ -29,11 +29,9 @@ For example, my config
       `git checkout tags/<version> && go install`
 
 To get version tags, first fetch all tags with `git fetch --all --tags` and then
-run`git tag`.
+run `git tag`.
 
-This repo is also mirrored on GitHub, where
-[releases](https://github.com/tjex/dotf/releases) and
-[tags](https://github.com/tjex/dotf/tags) can be viewed.
+This repo is also [mirrored on GitHub](https://github.com/tjex/dotf).
 
 ## Usage
 
@@ -75,3 +73,4 @@ dotf log --oneline
 dotf rebase -i HEAD~2
 ...
 ```
+
