@@ -73,4 +73,3 @@ dotf log --oneline
 dotf rebase -i HEAD~2
 ...
 ```
-
