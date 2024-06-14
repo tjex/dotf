@@ -2,6 +2,7 @@ package dotf
 
 import (
 	"fmt"
+	"os/exec"
 
 	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/internal/config"
@@ -33,4 +34,14 @@ func List() {
 	for _, submodule := range *submodulePaths {
 		fmt.Println(submodule)
 	}
+}
+
+func Cd() {
+	// get submodule paths
+	submodulePaths := config.Submodules()
+
+	// fill fzf picker with submodule paths
+	// take user selection
+	// cd into selected
+
 }
