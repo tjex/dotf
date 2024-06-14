@@ -1,6 +1,6 @@
 image: alpine/edge
 secrets:
-  - 6f71e0f7-b242-4c20-8aaf-e838719fc3de    # Set your UUID here!
+  - 91bfe501-d4ff-4aeb-b14a-9b9790957dc7    # Set your UUID here!
 environment:
   REPO: dotf
   GH_USER: tjex
