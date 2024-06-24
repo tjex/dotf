@@ -82,4 +82,4 @@ dotf rebase -i HEAD~2
 ## Author
 
 Tillman Jex \
-www.tjex.net
+[www.tjex.net](https://tjex.net)
