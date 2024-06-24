@@ -38,21 +38,26 @@ This repo is also [mirrored on GitHub](https://github.com/tjex/dotf).
 All `git` commands are passed as normal. Some are intercepted and handled
 differently, some are unique:
 
-```text
+```markdown
 `dotf sm --prime`:
     add (with `git add -A`) and commit all changes to all submodules.
     Commit message is set in `config.toml`.
 
 `dotf sm --list`:
-    list all tracked submodules
+    list all tracked submodules.
 
-`dotf push` - push to origin and mirror concurrently.
+`dotf sm --edit`:
+    search submodule directories with `fzf`, opening selected with $EDITOR
+    (defaults to vim).
 
-`dotf --help`
+`dotf push`: 
+    push to origin and mirror concurrently.
+
+`dotf --help`:
     display help for dotf or git (interactively)
 
-
 ```
+All flags have shorthand as well: `--prime` / `-p`.
 
 A regular workflow would then look like the following. From anywhere in your
 file system:
@@ -74,3 +79,7 @@ dotf rebase -i HEAD~2
 ...
 ```
 
+## Author
+
+Tillman Jex \
+www.tjex.net
