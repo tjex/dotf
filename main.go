@@ -13,7 +13,7 @@ import (
 type smCmd struct {
 	Prime bool `arg:"-p,--prime" default:"false" help:"add and commit all changes to all submodules"`
 	List  bool `arg:"-l,--list" default:"false" help:"list all tracked submodules"`
-	Cd    bool `arg:"-c, --cd" default:false" help:"cd into selected submodule via fzf"`
+	Edit  bool `arg:"-e, --edit" default:"false" help:"cd into selected submodule via fzf"`
 }
 
 type pushCmd struct {
@@ -51,8 +51,8 @@ func main() {
 			dotf.Prime()
 		case args.Sm.List:
 			dotf.List()
-        case args.Sm.Cd:
-            dotf.Cd()
+		case args.Sm.Edit:
+			dotf.Edit()
 		default:
 			p.WriteHelp(os.Stdout)
 		}

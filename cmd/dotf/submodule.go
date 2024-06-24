@@ -2,7 +2,7 @@ package dotf
 
 import (
 	"fmt"
-	"os/exec"
+	"os"
 
 	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/internal/config"
@@ -36,12 +36,16 @@ func List() {
 	}
 }
 
-func Cd() {
+func Edit() {
 	// get submodule paths
 	submodulePaths := config.Submodules()
+	var pathsDeref = *submodulePaths
 
-	// fill fzf picker with submodule paths
-	// take user selection
-	// cd into selected
-
+	// return choice from fzf selection
+	var choice, err = cmd.CmdFzf(pathsDeref)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	cmd.CmdEditor(choice)
 }
