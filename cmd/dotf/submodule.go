@@ -2,7 +2,7 @@ package dotf
 
 import (
 	"fmt"
-	"os"
+	"strings"
 
 	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/internal/config"
@@ -43,9 +43,13 @@ func Edit() {
 
 	// return choice from fzf selection
 	var choice, err = cmd.CmdFzf(pathsDeref)
-	if err != nil {
+	fzfCancelled := strings.Contains(err.Error(), "exit status 130")
+	if fzfCancelled {
+		return
+	}
+	if err != nil && !fzfCancelled {
 		fmt.Println(err)
-		os.Exit(1)
+		return
 	}
 	cmd.CmdEditor(choice)
 }

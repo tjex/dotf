@@ -90,12 +90,8 @@ func CmdEditor(path string) {
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
 	cmd.Run()
+
 }
 
 // A dotf command is a git command with flags set as per the user's
