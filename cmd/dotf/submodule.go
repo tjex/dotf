@@ -16,6 +16,7 @@ func Prime() {
 	message := cfg.BatchCommitMessage
 
 	for _, s := range *submodulePaths {
+		// the -C option points to a different cwd for that singular git cmd
 		status := []string{"-C", s, "status", "--porcelain"}
 		add := []string{"-C", s, "add", "-A"}
 		batchCommit := []string{"-C", s, "commit", "-m", message}
