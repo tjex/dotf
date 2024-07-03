@@ -1,40 +1,26 @@
 package config
 
 import (
-	"bufio"
 	"os"
 	"slices"
-	"strings"
 	"testing"
 )
 
-func TestSubmodules(t *testing.T) {
-	testConf := "../../fixtures/test-config"
-	var configLines, submodulePaths []string
+// test config.extractSubmodules()
+func TestSubmoduleExtraction(t *testing.T) {
+	testConf := "./testdata/test-config"
 	file, err := os.Open(testConf)
 	if err != nil {
-		t.Fatal("error opening bare repository config:", err)
-	}
-	defer file.Close()
-	sc := bufio.NewScanner(file)
-	for sc.Scan() {
-		configLines = append(configLines, sc.Text())
-	}
-	for _, line := range configLines {
-		match := submLineRe.FindString(line)
-		submodulePath := submPathRe.FindString(match)
-		if submodulePath != "" {
-			submodulePath = strings.ReplaceAll(submodulePath, `"`, "")
-			submodulePaths = append(submodulePaths, submodulePath)
-		}
+		t.Fatal(err)
 	}
 	want := []string{
 		"/Users/foo/.config/asciinema",
 		"/Users/foo/.config/aerc",
 		"/Users/foo/.config/goimap",
 	}
-	have := submodulePaths
+	have := extractSubmodules(file)
+
 	if slices.Compare(want, have) != 0 {
-		t.Fatal("\nwant:", want, "\nhave:", have)
+		t.Fatal("\nwant:", want, "\nbut have:", have)
 	}
 }

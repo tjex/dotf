@@ -87,15 +87,9 @@ func BareRepoConfig() string {
 
 }
 
-// Extracts submodule paths from bare repo git config and returns as pointer.
-func Submodules() *[]string {
+// Parse the provided git config file and return its submodule paths.
+func extractSubmodules(file *os.File) []string {
 	var configLines, submodulePaths []string
-	conf := BareRepoConfig()
-	file, err := os.Open(conf)
-	if err != nil {
-		log.Println("error opening bare repository config:", err)
-	}
-	defer file.Close()
 	sc := bufio.NewScanner(file)
 	for sc.Scan() {
 		configLines = append(configLines, sc.Text())
@@ -109,6 +103,20 @@ func Submodules() *[]string {
 		}
 	}
 
-	return &submodulePaths
+	return submodulePaths
 
 }
+
+// Extracts submodule paths from bare repo git config and returns as pointer.
+func Submodules() *[]string {
+	conf := BareRepoConfig()
+	file, err := os.Open(conf)
+	if err != nil {
+		log.Println("error opening bare repository config:", err)
+	}
+	defer file.Close()
+	submodules := extractSubmodules(file)
+	return &submodules
+
+}
+
