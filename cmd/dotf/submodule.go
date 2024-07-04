@@ -43,11 +43,14 @@ func Edit() {
 
 	// return choice from fzf selection
 	var choice, err = cmd.CmdFzf(pathsDeref)
-	fzfCancelled := strings.Contains(err.Error(), "exit status 130")
-	if fzfCancelled {
+
+	// exit quietly if fzf process is cancelled
+	if err != nil && strings.Contains(err.Error(), "exit status 130") {
 		return
 	}
-	if err != nil && !fzfCancelled {
+
+	// if there's actually an error, print it and exit quietly.
+	if err != nil {
 		fmt.Println(err)
 		return
 	}
