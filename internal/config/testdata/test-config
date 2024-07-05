@@ -27,3 +27,6 @@
 [submodule "/Users/foo/.config/goimap"]
 	url = git@git.sr.ht:~foo/goimap-conf
 	active = true
+[submodule ".local/share/bkmr"]
+	url = git@git.sr.ht:~tjex/bkmr-db
+	active = true
