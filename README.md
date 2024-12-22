@@ -39,24 +39,19 @@ All `git` commands are passed as normal. Some are intercepted and handled
 differently, some are unique:
 
 ```markdown
-`dotf sm --prime`:
-    add (with `git add -A`) and commit all changes to all submodules.
-    Commit message is set in `config.toml`.
+`dotf sm --prime`: add (with `git add -A`) and commit all changes to all
+submodules. Commit message is set in `config.toml`.
 
-`dotf sm --list`:
-    list all tracked submodules.
+`dotf sm --list`: list all tracked submodules.
 
-`dotf sm --edit`:
-    search submodule directories with `fzf`, opening selected with $EDITOR
-    (defaults to vim).
+`dotf sm --edit`: search submodule directories with `fzf`, opening selected with
+$EDITOR (defaults to vim).
 
-`dotf push`: 
-    push to origin and mirror concurrently.
+`dotf push`: push to origin and mirror concurrently.
 
-`dotf --help`:
-    display help for dotf or git (interactively)
-
+`dotf --help`: display help for dotf or git (interactively)
 ```
+
 All flags have shorthand as well: `--prime` / `-p`.
 
 A regular workflow would then look like the following. From anywhere in your
@@ -69,6 +64,13 @@ dotf commit -m "update all dotfiles"
 
 dotf push
 ```
+
+> Note: you (for now) still need to push each submodules repo themselves.
+> `dotf push` pushes the commit reference to your dotfiles repo, but it does not
+> push the actual contents of you submodule to the remote.
+>
+> To do this, you can execute `dotf sm --prime` as normal, and then run
+> `dotf submodule foreach git push`
 
 Run all other git commands as normal:
 
