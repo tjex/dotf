@@ -67,7 +67,7 @@ dotf push
 
 > Note: you (for now) still need to push each submodules repo themselves.
 > `dotf push` pushes the commit reference to your dotfiles repo, but it does not
-> push the actual contents of you submodule to the remote.
+> push the actual contents of you submodule to its remote.
 >
 > To do this, you can execute `dotf sm --prime` as normal, and then run
 > `dotf submodule foreach git push`
