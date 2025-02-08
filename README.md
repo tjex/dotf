@@ -15,6 +15,7 @@ worktree = "/Users/<user>" # note: must be absolute path (no $HOME, ~/, etc.. ye
 gitdir = "/Users/<user>/.cfg/" # the bare git repo root
 origin = "<read+write url for origin>" # eg, git@yourhost.com:user/dotfiles
 mirror = "<read+write url for mirror>" # eg, git@yourmirror.com:user/dotfiles
+mode = "mirror" # push to the mirror with `git push --mirror`. Default is a non-destructive push.
 batch-commit-message = "batch dotf update" # used by `dotf sm --prime` for submodule commit message
 ```
 
