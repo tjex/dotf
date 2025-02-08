@@ -13,7 +13,12 @@ var pushArgsOrigin, pushArgsMirror []string
 func Push(remote string) {
 	conf := config.UserConfig()
 	pushArgsOrigin = append(pushArgsOrigin, "push")
-	pushArgsMirror = append(pushArgsMirror, "push", "--mirror", conf.Mirror)
+
+	if conf.Mode == "mirror" {
+		pushArgsMirror = append(pushArgsMirror, "push", "--mirror", conf.Mirror)
+	} else {
+		pushArgsMirror = append(pushArgsMirror, "push", conf.Mirror)
+	}
 
 	if remote == "" {
 		c1 := make(chan string)
@@ -31,12 +36,12 @@ func Push(remote string) {
 		out1 := <-c1
 		out2 := <-c2
 
-		fmt.Println("---origin---")
+		fmt.Println(conf.Origin)
 		fmt.Println(out1)
-		fmt.Println("---mirror---")
+		fmt.Println(conf.Mirror)
 		fmt.Println(out2)
 	} else {
-        fmt.Println("execute regular push cmd here")
-    }
+		fmt.Println("execute regular push cmd here")
+	}
 
 }
