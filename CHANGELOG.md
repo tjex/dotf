@@ -1,5 +1,9 @@
 # dotf Changelog
 
+## v0.2.0
+
+- Remove mirroring functionality completely.
+
 ## v0.1.4
 
 - Added the 'mode' config option (to push to mirror with `--mirror` or not).
