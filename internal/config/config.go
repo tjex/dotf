@@ -25,8 +25,6 @@ type Config struct {
 	Worktree           string
 	GitDir             string `toml:"git-dir"`
 	Origin             string
-	Mirror             string
-    Mode               string
 	RepoFlags          []string // Flags for bare repo dir and worktree
 	BatchCommitMessage string   `toml:"batch-commit-message"`
 }

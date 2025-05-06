@@ -21,8 +21,8 @@ type pushCmd struct {
 }
 
 var args struct {
-	Push *pushCmd `arg:"subcommand:push" help:"push to origin and mirror concurrently"`
-	Sm   *smCmd   `arg:"subcommand:sm" help:"operations for git submodules"`
+	Push *pushCmd `arg:"subcommand:push" help:"push to origin."`
+	Sm   *smCmd   `arg:"subcommand:sm" help:"operations for git submodules."`
 }
 
 func main() {
