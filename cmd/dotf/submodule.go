@@ -11,18 +11,23 @@ import (
 
 var cfg = config.UserConfig()
 
-// Add and commit any unstaged changes in all submodules
+// Add and commit any unstaged changes in all modules
 func Prime() {
-	repos := &cfg.Modules
+	modules := &cfg.Modules
 	message := &cfg.BatchCommitMessage
 
-	for _, s := range *repos {
+	for _, m := range *modules {
+		repo, err := util.ExpandPath(m)
+		if err != nil {
+		    fmt.Println(err)
+		}
+
 		// the -C option points to a different cwd for that singular git cmd
-		status := []string{"-C", s, "status", "--porcelain"}
-		add := []string{"-C", s, "add", "-A"}
-		batchCommit := []string{"-C", s, "commit", "-m", *message}
+		status := []string{"-C", repo, "status", "--porcelain"}
+		add := []string{"-C", repo, "add", "-A"}
+		batchCommit := []string{"-C", repo, "commit", "-m", *message}
 		report := cmd.Cmd("git", status)
-		// clean submodule repos return an empty string
+		// clean repo returns an empty string
 		if report != "" {
 			cmd.Cmd("git", add)
 			cmd.Cmd("git", batchCommit)
