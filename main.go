@@ -10,19 +10,15 @@ import (
 	"github.com/alexflint/go-arg"
 )
 
-type smCmd struct {
+type moduleCmd struct {
 	Prime bool `arg:"-p,--prime" default:"false" help:"add and commit all changes to all submodules"`
 	List  bool `arg:"-l,--list" default:"false" help:"list all tracked submodules"`
 	Edit  bool `arg:"-e, --edit" default:"false" help:"cd into selected submodule via fzf"`
 }
 
-type pushCmd struct {
-	Remote string `arg:"positional"`
-}
 
 var args struct {
-	Push *pushCmd `arg:"subcommand:push" help:"push to origin."`
-	Sm   *smCmd   `arg:"subcommand:sm" help:"operations for git submodules."`
+	Module   *moduleCmd   `arg:"subcommand:m" help:"operations for git submodules."`
 }
 
 func main() {
@@ -42,16 +38,14 @@ func main() {
 	p.Parse(stdinArgs)
 
 	switch {
-	case args.Push != nil:
-		dotf.Push(args.Push.Remote)
-	case args.Sm != nil:
+	case args.Module != nil:
 		// positional flags for `sm`
 		switch {
-		case args.Sm.Prime:
+		case args.Module.Prime:
 			dotf.Prime()
-		case args.Sm.List:
+		case args.Module.List:
 			dotf.List()
-		case args.Sm.Edit:
+		case args.Module.Edit:
 			dotf.Edit()
 		default:
 			p.WriteHelp(os.Stdout)

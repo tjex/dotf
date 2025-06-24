@@ -1,24 +1,19 @@
 package config
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strings"
 
 	toml "github.com/pelletier/go-toml/v2"
 )
 
 var (
-	buf        bytes.Buffer
-	logger     = log.New(&buf, "logger: ", log.Lshortfile)
-	cfg        Config
-	submLineRe = regexp.MustCompile(`^\[submodule ".+?"\]`)
-	submPathRe = regexp.MustCompile(`"(.+?)"`)
+	buf    bytes.Buffer
+	logger = log.New(&buf, "logger: ", log.Lshortfile)
+	cfg    Config
 )
 
 type Config struct {
@@ -27,12 +22,12 @@ type Config struct {
 	Origin             string
 	RepoFlags          []string // Flags for bare repo dir and worktree
 	BatchCommitMessage string   `toml:"batch-commit-message"`
+	Modules              []string
 }
 
 // returns pointer to user config struct
 func UserConfig() *Config {
-	c := &cfg
-	return c
+	return &cfg
 }
 
 // reads user configuration from a .toml file
@@ -47,21 +42,13 @@ func ReadUserConfig() {
 	if err != nil {
 		logger.Print(err)
 	}
-	parseConfig(file)
 
-}
-
-// parse a .toml file for usage.
-func parseConfig(config []byte) {
-	err := toml.Unmarshal(config, &cfg)
+	err = toml.Unmarshal(file, &cfg)
 	if err != nil {
 		logger.Print(err)
 	}
-	buildGitRepoFlags(&cfg)
-}
 
-// build the bare repo git argument array
-func buildGitRepoFlags(cfg *Config) {
+	// set git flags
 	var flags []string
 	flags = append(flags, "--git-dir", cfg.GitDir, "--work-tree", cfg.Worktree)
 	cfg.RepoFlags = flags
@@ -83,42 +70,4 @@ func configDir() string {
 func BareRepoConfig() string {
 	gitConf := filepath.Join(cfg.GitDir, "config")
 	return gitConf
-
-}
-
-// Parse the provided git config file and return its submodule paths.
-func extractSubmodulePaths(file *os.File) []string {
-	var configLines, submodulePaths []string
-	sc := bufio.NewScanner(file)
-	for sc.Scan() {
-		configLines = append(configLines, sc.Text())
-	}
-	for _, line := range configLines {
-		match := submLineRe.FindString(line)
-		submodulePath := submPathRe.FindString(match)
-		if submodulePath != "" {
-			submodulePath = strings.ReplaceAll(submodulePath, `"`, "")
-			// format as absolute paths for clarity and safety
-			if !filepath.IsAbs(submodulePath) {
-				submodulePath = filepath.Join(cfg.Worktree, submodulePath)
-			}
-			submodulePaths = append(submodulePaths, submodulePath)
-		}
-	}
-
-	return submodulePaths
-
-}
-
-// Extracts submodule paths from bare repo git config and returns as pointer.
-func Submodules() *[]string {
-	conf := BareRepoConfig()
-	file, err := os.Open(conf)
-	if err != nil {
-		log.Println("error opening bare repository config:", err)
-	}
-	defer file.Close()
-	submodules := extractSubmodulePaths(file)
-	return &submodules
-
 }

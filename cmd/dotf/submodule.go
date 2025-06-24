@@ -6,20 +6,21 @@ import (
 
 	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/internal/config"
+	"git.sr.ht/~tjex/dotf/internal/util"
 )
+
+var cfg = config.UserConfig()
 
 // Add and commit any unstaged changes in all submodules
 func Prime() {
-	submodulePaths := config.Submodules()
-	cfg := config.UserConfig()
+	repos := &cfg.Modules
+	message := &cfg.BatchCommitMessage
 
-	message := cfg.BatchCommitMessage
-
-	for _, s := range *submodulePaths {
+	for _, s := range *repos {
 		// the -C option points to a different cwd for that singular git cmd
 		status := []string{"-C", s, "status", "--porcelain"}
 		add := []string{"-C", s, "add", "-A"}
-		batchCommit := []string{"-C", s, "commit", "-m", message}
+		batchCommit := []string{"-C", s, "commit", "-m", *message}
 		report := cmd.Cmd("git", status)
 		// clean submodule repos return an empty string
 		if report != "" {
@@ -31,19 +32,18 @@ func Prime() {
 
 // Return paths to all submodules
 func List() {
-	submodulePaths := config.Submodules()
-	for _, submodule := range *submodulePaths {
-		fmt.Println(submodule)
+	repos := &cfg.Modules
+	for _, r := range *repos {
+		fmt.Println(r)
 	}
 }
 
 func Edit() {
 	// get submodule paths
-	submodulePaths := config.Submodules()
-	var pathsDeref = *submodulePaths
+	repos := &cfg.Modules
 
 	// return choice from fzf selection
-	var choice, err = cmd.CmdFzf(pathsDeref)
+	var choice, err = cmd.CmdFzf(*repos)
 
 	// exit quietly if fzf process is cancelled
 	if err != nil && strings.Contains(err.Error(), "exit status 130") {
@@ -54,6 +54,10 @@ func Edit() {
 	if err != nil {
 		fmt.Println(err)
 		return
+	}
+	choice, err = util.ExpandPath(choice)
+	if err != nil {
+	    fmt.Println(err)
 	}
 	cmd.CmdEditor(choice)
 }
