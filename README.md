@@ -14,7 +14,8 @@ The below settings are for demonstration in keeping with the
 worktree = "/Users/<user>" # note: must be absolute path (no $HOME, ~/, etc.. yet)
 gitdir = "/Users/<user>/.cfg/" # the bare git repo root
 origin = "<read+write url for origin>" # eg, git@yourhost.com:user/dotfiles
-batch-commit-message = "batch dotf update" # used by `dotf sm --prime` for submodule commit message
+batch-commit-message = "batch dotf update" # used by `dotf m --prime` for module commit message
+modules = ["~/path/to/repo1", "~/path/to/repo2"] # like git submodles, but not a part of  the bare repo
 ```
 
 For example, my config
@@ -38,12 +39,12 @@ All `git` commands are passed as normal. Some are intercepted and handled
 differently, some are unique:
 
 ```markdown
-`dotf sm --prime`: add (with `git add -A`) and commit all changes to all
-submodules. Commit message is set in `config.toml`.
+`dotf m --prime`: add (with `git add -A`) and commit all changes to all
+modules. Commit message is set in `config.toml`.
 
-`dotf sm --list`: list all tracked submodules.
+`dotf m --list`: list all tracked modules.
 
-`dotf sm --edit`: search submodule directories with `fzf`, opening selected with
+`dotf m --edit`: search module directories with `fzf`, opening selected with
 $EDITOR (defaults to vim).
 
 `dotf push`: push to origin.
@@ -53,23 +54,6 @@ $EDITOR (defaults to vim).
 
 All flags have shorthand as well: `--prime` / `-p`.
 
-A regular workflow would then look like the following. From anywhere in your
-file system:
-
-```bash
-dotf sm --prime # add and commit all changes within submodules
-dotf add -u # add all changes to tracked dotfiles
-dotf commit -m "update all dotfiles"
-
-dotf push
-```
-
-> Note: you (for now) still need to push each submodules repo themselves.
-> `dotf push` pushes the commit reference to your dotfiles repo, but it does not
-> push the actual contents of you submodule to its remote.
->
-> To do this, you can execute `dotf sm --prime` as normal, and then run
-> `dotf submodule foreach git push`
 
 Run all other git commands as normal:
 
@@ -78,7 +62,13 @@ dotf status
 dotf log --oneline
 dotf rebase -i HEAD~2
 ...
+
 ```
+
+## TODO
+
+- Module pull
+- Module push
 
 ## Author
 
