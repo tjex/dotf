@@ -11,14 +11,14 @@ import (
 )
 
 type moduleCmd struct {
-	Prime bool `arg:"-p,--prime" default:"false" help:"add and commit all changes to all submodules"`
-	List  bool `arg:"-l,--list" default:"false" help:"list all tracked submodules"`
-	Edit  bool `arg:"-e, --edit" default:"false" help:"cd into selected submodule via fzf"`
+	Prime bool `arg:"-p,--prime" default:"false" help:"add and commit all changes to all modules"`
+	List  bool `arg:"-l,--list" default:"false" help:"list all tracked modules"`
+	Edit  bool `arg:"-e, --edit" default:"false" help:"cd into selected module via fzf"`
 }
 
 
 var args struct {
-	Module   *moduleCmd   `arg:"subcommand:m" help:"operations for git submodules."`
+	Module   *moduleCmd   `arg:"subcommand:m" help:"operations for git modules."`
 }
 
 func main() {
