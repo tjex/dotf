@@ -15,7 +15,7 @@ var cfg = config.UserConfig()
 // Add and commit any unstaged changes in all modules.
 // There's not real need to check if the repo is dirty. The failure is quick and 
 // has no side effects.
-func Commit() {
+func Prime() {
 	modules := &cfg.Modules
 	message := &cfg.BatchCommitMessage
 

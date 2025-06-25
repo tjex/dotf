@@ -11,9 +11,9 @@ import (
 )
 
 type moduleCmd struct {
-	Commit bool `arg:"-c,--commit" default:"false" help:"add and commit all changes to all modules"`
-	Push bool `arg:"-p,--push" default:"false" help:"pushes all modules to their remotes."`
-	Pull bool `arg:"-p,--pull" default:"false" help:"pulls all modules from their remotes."`
+	Prime bool `arg:"--prime" default:"false" help:"add and commit all changes to all modules"`
+	Push bool `arg:"--push" default:"false" help:"pushes all modules to their remotes."`
+	Pull bool `arg:"--pull" default:"false" help:"pulls all modules from their remotes."`
 	List  bool `arg:"-l,--list" default:"false" help:"list all tracked modules"`
 	Edit  bool `arg:"-e, --edit" default:"false" help:"cd into selected module via fzf"`
 }
@@ -43,8 +43,8 @@ func main() {
 	case args.Module != nil:
 		// positional flags for `sm`
 		switch {
-		case args.Module.Commit:
-			dotf.Commit()
+		case args.Module.Prime:
+			dotf.Prime()
 		case args.Module.Push:
 			dotf.Push()
 		case args.Module.Pull:
