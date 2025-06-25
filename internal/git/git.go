@@ -2,6 +2,7 @@ package git
 
 import (
 	"regexp"
+
 	"git.sr.ht/~tjex/dotf/cmd"
 )
 
@@ -31,8 +32,8 @@ func Pull(repo string) string {
 	return out
 }
 
-func Commit(repo string , message string) string {
-	out := cmd.Cmd("git", []string{"-C", repo, "commit", "-m", message})
+func Commit(repo string , message *string) string {
+	out := cmd.Cmd("git", []string{"-C", repo, "commit", "-m", *message})
 	return out
 }
 

@@ -11,15 +11,23 @@ import (
 	"git.sr.ht/~tjex/dotf/internal/config"
 )
 
+var emptyBytes = make([]byte, 128)
+
 // A regular exec.Command but stdout and stderr merged and returned as strings.
 func Cmd(prog string, args []string) string {
-	var out bytes.Buffer
+	var outStd bytes.Buffer
+	var outErr bytes.Buffer
 	cmd := exec.Command(prog, args...)
-	cmd.Stdout = &out
+	cmd.Stdout = &outStd
 	cmd.Stdin = os.Stdin
-	cmd.Stderr = &out
+	cmd.Stderr = &outErr
 	cmd.Run() // errors are returned and handled by git itself
-	return out.String()
+	if len(outErr.Bytes()) > 0 {
+		fmt.Fprintf(os.Stderr, "%v\n", outErr.String())
+		os.Exit(1)
+	}
+
+	return outStd.String()
 }
 
 // Run fzf by piping arguments.

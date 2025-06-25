@@ -28,8 +28,9 @@ func Prime() {
 		report := git.Status(repo)
 		// clean repo returns an empty string
 		if report != "" {
+			fmt.Println("Priming", repo)
 			git.Add(repo)
-			git.Commit(repo, *message)
+			git.Commit(repo, message)
 		}
 	}
 }
