@@ -33,26 +33,53 @@ run `git tag`.
 
 This repo is also [mirrored on GitHub](https://github.com/tjex/dotf).
 
+## Modules
+
+Modules are a replacement for Git's submodules feature. I found that adding
+extra repositories to my bare repo to be frustrating at times as it requires the
+`git submodules for each ...` way of working.
+
+Adding submodules also creates strict relationships between the submodule and
+the bare repository. Once this broke my config an was very difficult to fix.
+This is a little scary when the bare repository is in control of a large portion
+of your systems configuration.
+
+Instead `modules` are regular git repositories, in the sense that they have no
+relationship to your bare dotfiles respository. You can clone a repo somewhere
+on your system, add its path to the `modules` array in the `config.toml` and
+then list, edit, pull, commit and push with the `m` command: `dotf m --list`.
+
+Submodules are therefore still available for you to use as normal: `dotf
+submodule add ...`, etc. As all Git commands apart from those intercepted in
+this program are _passed to your bare dotfiles Git repository_.
+
 ## Usage
 
 All `git` commands are passed as normal. Some are intercepted and handled
 differently, some are unique:
 
 ```markdown
-`dotf m --prime`: add (with `git add -A`) and commit all changes to all
-modules. Commit message is set in `config.toml`.
 
 `dotf m --list`: list all tracked modules.
 
 `dotf m --edit`: search module directories with `fzf`, opening selected with
 $EDITOR (defaults to vim).
 
-`dotf push`: push to origin.
+`dotf m --pull`: pull upstream changes from all modules.
+
+`dotf m --commit`: add (with `git add -A`) and commit all changes to all
+modules. Commit message is set in `config.toml`.
+
+`dotf m --push`: push local changes of all modules.
+
+`dotf pull`: pull bare dotfiles repository from origin.
+
+`dotf push`: push bare dotfiles repository to origin.
 
 `dotf --help`: display help for dotf or git (interactively)
 ```
 
-All flags have shorthand as well: `--prime` / `-p`.
+All flags have shorthand as well: `--commit` / `-c`.
 
 
 Run all other git commands as normal:
@@ -64,11 +91,6 @@ dotf rebase -i HEAD~2
 ...
 
 ```
-
-## TODO
-
-- Module pull
-- Module push
 
 ## Author
 
