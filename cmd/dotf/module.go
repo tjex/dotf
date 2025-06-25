@@ -6,20 +6,23 @@ import (
 
 	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/internal/config"
+	"git.sr.ht/~tjex/dotf/internal/git"
 	"git.sr.ht/~tjex/dotf/internal/util"
 )
 
 var cfg = config.UserConfig()
 
-// Add and commit any unstaged changes in all modules
-func Prime() {
+// Add and commit any unstaged changes in all modules.
+// There's not real need to check if the repo is dirty. The failure is quick and 
+// has no side effects.
+func Commit() {
 	modules := &cfg.Modules
 	message := &cfg.BatchCommitMessage
 
 	for _, m := range *modules {
 		repo, err := util.ExpandPath(m)
 		if err != nil {
-		    fmt.Println(err)
+			fmt.Println(err)
 		}
 
 		// the -C option points to a different cwd for that singular git cmd
@@ -35,13 +38,35 @@ func Prime() {
 	}
 }
 
-// TODO
 func Push() {
-
+	modules := &cfg.Modules
+	for _, m := range *modules {
+		repo, err := util.ExpandPath(m)
+		if err != nil {
+			fmt.Println(err)
+		}
+		wantsPush, _ := git.SyncState(repo)
+		if wantsPush {
+			fmt.Println("Pushing", repo)
+			git.Push(repo)
+		}
+	}
 }
 
 // TODO
 func Pull() {
+	modules := &cfg.Modules
+	for _, m := range *modules {
+		repo, err := util.ExpandPath(m)
+		if err != nil {
+			fmt.Println(err)
+		}
+		_, wantsPull := git.SyncState(repo)
+		if wantsPull {
+			fmt.Println("Pulling", repo)
+			git.Push(repo)
+		}
+	}
 
 }
 
@@ -50,6 +75,7 @@ func Sync() {
 	// pull
 	// prime
 	// push
+	// needs to handle merge conflict reports etc
 }
 
 // Return paths to all submodules
@@ -79,7 +105,7 @@ func Edit() {
 	}
 	choice, err = util.ExpandPath(choice)
 	if err != nil {
-	    fmt.Println(err)
+		fmt.Println(err)
 	}
 	cmd.CmdEditor(choice)
 }
