@@ -67,7 +67,7 @@ $EDITOR (defaults to vim).
 
 `dotf m --pull`: pull upstream changes from all modules.
 
-`dotf m --commit`: add (with `git add -A`) and commit all changes to all
+`dotf m --prime`: add (with `git add -A`) and commit all changes to all
 modules. Commit message is set in `config.toml`.
 
 `dotf m --push`: push local changes of all modules.
@@ -78,9 +78,6 @@ modules. Commit message is set in `config.toml`.
 
 `dotf --help`: display help for dotf or git (interactively)
 ```
-
-All flags have shorthand as well: `--commit` / `-c`.
-
 
 Run all other git commands as normal:
 
