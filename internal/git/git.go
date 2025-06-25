@@ -25,3 +25,25 @@ func Push(repo string) string {
 	out := cmd.Cmd("git", []string{"-C", repo, "push"})
 	return out
 }
+
+func Pull(repo string) string {
+	out := cmd.Cmd("git", []string{"-C", repo, "pull"})
+	return out
+}
+
+func Commit(repo string , message string) string {
+	out := cmd.Cmd("git", []string{"-C", repo, "commit", "-m", message})
+	return out
+}
+
+
+func Add(repo string) string {
+	out := cmd.Cmd("git", []string{"-C", repo, "add", "-A"})
+	return out
+}
+
+
+func Status(repo string) string {
+	out := cmd.Cmd("git", []string{"-C", repo, "status", "--porcelain"})
+	return out
+}

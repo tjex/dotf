@@ -25,15 +25,11 @@ func Commit() {
 			fmt.Println(err)
 		}
 
-		// the -C option points to a different cwd for that singular git cmd
-		status := []string{"-C", repo, "status", "--porcelain"}
-		add := []string{"-C", repo, "add", "-A"}
-		batchCommit := []string{"-C", repo, "commit", "-m", *message}
-		report := cmd.Cmd("git", status)
+		report := git.Status(repo)
 		// clean repo returns an empty string
 		if report != "" {
-			cmd.Cmd("git", add)
-			cmd.Cmd("git", batchCommit)
+			git.Add(repo)
+			git.Commit(repo, *message)
 		}
 	}
 }
@@ -53,7 +49,6 @@ func Push() {
 	}
 }
 
-// TODO
 func Pull() {
 	modules := &cfg.Modules
 	for _, m := range *modules {
@@ -64,7 +59,7 @@ func Pull() {
 		_, wantsPull := git.SyncState(repo)
 		if wantsPull {
 			fmt.Println("Pulling", repo)
-			git.Push(repo)
+			git.Pull(repo)
 		}
 	}
 
