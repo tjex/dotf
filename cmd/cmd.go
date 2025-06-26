@@ -21,10 +21,9 @@ func Cmd(prog string, args []string) string {
 	cmd.Stdout = &outStd
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = &outErr
-	cmd.Run() // errors are returned and handled by git itself
+	cmd.Run()
 	if len(outErr.Bytes()) > 0 {
 		fmt.Fprintf(os.Stderr, "%v\n", outErr.String())
-		os.Exit(1)
 	}
 
 	return outStd.String()
