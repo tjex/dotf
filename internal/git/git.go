@@ -11,8 +11,8 @@ func SyncState(repoPath string) (bool, bool) {
 	args := []string{"-C", repoPath, "rev-list", "--left-right", "--count", "HEAD...@{u}"} 
 	out := cmd.Cmd("git", args)
 
-	wantsPush, _ := regexp.MatchString(`\d*.*`, out)
-	wantsPull, _ := regexp.MatchString(`.*\d*`, out)
+	wantsPush, _ := regexp.MatchString(`^([1-9]\d*)\s+[0-9]\d*`, out)
+	wantsPull, _ := regexp.MatchString(`^[0-9]\d*\s+([1-9]\d*)`, out)
 
 	return wantsPush, wantsPull
 }
