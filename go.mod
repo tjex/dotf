@@ -1,6 +1,6 @@
 module git.sr.ht/~tjex/dotf
 
-go 1.22.2
+go 1.25
 
 require (
 	github.com/alexflint/go-arg v1.5.0
