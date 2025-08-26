@@ -8,6 +8,10 @@ import (
 
 // Returns whether local branch wants a push / pull
 func SyncState(repoPath string) (bool, bool) {
+	// Refresh state so subsequent commands know if pull or push is needed.
+	fetch := []string{"-C", repoPath, "fetch", "--prune"}
+	cmd.Cmd("git", fetch)
+
 	args := []string{"-C", repoPath, "rev-list", "--left-right", "--count", "HEAD...@{u}"} 
 	out := cmd.Cmd("git", args)
 
