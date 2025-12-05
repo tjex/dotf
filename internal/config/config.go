@@ -12,7 +12,7 @@ import (
 
 var (
 	buf    bytes.Buffer
-	logger = log.New(&buf, "logger: ", log.Lshortfile)
+	logger = log.New(os.Stdout, "", log.Lshortfile)
 	cfg    Config
 )
 
@@ -22,7 +22,7 @@ type Config struct {
 	Origin             string
 	RepoFlags          []string // Flags for bare repo dir and worktree
 	BatchCommitMessage string   `toml:"batch-commit-message"`
-	Modules              []string
+	Modules            []string `toml:"modules"`
 }
 
 // returns pointer to user config struct
