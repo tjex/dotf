@@ -20,9 +20,13 @@ type Config struct {
 	Worktree           string
 	GitDir             string `toml:"git-dir"`
 	Origin             string
-	RepoFlags          []string // Flags for bare repo dir and worktree
-	BatchCommitMessage string   `toml:"batch-commit-message"`
-	Modules            []string `toml:"modules"`
+	RepoFlags          []string                // Flags for bare repo dir and worktree
+	BatchCommitMessage string                  `toml:"batch-commit-message"`
+	Modules            map[string]ModuleConfig `toml:"modules"`
+}
+
+type ModuleConfig struct {
+	Paths []string `toml:"paths"`
 }
 
 // returns pointer to user config struct

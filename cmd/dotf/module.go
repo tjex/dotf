@@ -13,24 +13,27 @@ import (
 var cfg = config.UserConfig()
 
 // Add and commit any unstaged changes in all modules.
-// There's not real need to check if the repo is dirty. The failure is quick and 
+// There's not real need to check if the repo is dirty. The failure is quick and
 // has no side effects.
 func Prime() {
 	modules := &cfg.Modules
 	message := &cfg.BatchCommitMessage
 
 	for _, m := range *modules {
-		repo, err := util.ExpandPath(m)
-		if err != nil {
-			fmt.Println(err)
-		}
+		for _, p := range m.Paths {
 
-		report := git.Status(repo)
-		// clean repo returns an empty string
-		if report != "" {
-			fmt.Println("Priming", repo)
-			git.Add(repo)
-			git.Commit(repo, message)
+			repo, err := util.ExpandPath(p)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			report := git.Status(repo)
+			// clean repo returns an empty string
+			if report != "" {
+				fmt.Println("Priming", repo)
+				git.Add(repo)
+				git.Commit(repo, message)
+			}
 		}
 	}
 }
@@ -38,14 +41,17 @@ func Prime() {
 func Push() {
 	modules := &cfg.Modules
 	for _, m := range *modules {
-		repo, err := util.ExpandPath(m)
-		if err != nil {
-			fmt.Println(err)
-		}
-		wantsPush, _ := git.SyncState(repo)
-		if wantsPush {
-			fmt.Println("Pushing", repo)
-			git.Push(repo)
+		for _, p := range m.Paths {
+
+			repo, err := util.ExpandPath(p)
+			if err != nil {
+				fmt.Println(err)
+			}
+			wantsPush, _ := git.SyncState(repo)
+			if wantsPush {
+				fmt.Println("Pushing", repo)
+				git.Push(repo)
+			}
 		}
 	}
 }
@@ -53,14 +59,16 @@ func Push() {
 func Pull() {
 	modules := &cfg.Modules
 	for _, m := range *modules {
-		repo, err := util.ExpandPath(m)
-		if err != nil {
-			fmt.Println(err)
-		}
-		_, wantsPull := git.SyncState(repo)
-		if wantsPull {
-			fmt.Println("Pulling", repo)
-			git.Pull(repo)
+		for _, p := range m.Paths {
+			repo, err := util.ExpandPath(p)
+			if err != nil {
+				fmt.Println(err)
+			}
+			_, wantsPull := git.SyncState(repo)
+			if wantsPull {
+				fmt.Println("Pulling", repo)
+				git.Pull(repo)
+			}
 		}
 	}
 
@@ -76,18 +84,27 @@ func Sync() {
 
 // Return paths to all submodules
 func List() {
-	repos := &cfg.Modules
-	for _, r := range *repos {
-		fmt.Println(r)
+	modules := &cfg.Modules
+	for _, m := range *modules {
+		for _, p := range m.Paths {
+			fmt.Println(p)
+
+		}
 	}
 }
 
 func Edit() {
 	// get submodule paths
-	repos := &cfg.Modules
+	var repos []string
+	modules := &cfg.Modules
+	for _, m := range *modules {
+		for _, p := range m.Paths {
+			repos = append(repos, p)
+		}
+	}
 
 	// return choice from fzf selection
-	var choice, err = cmd.CmdFzf(*repos)
+	var choice, err = cmd.CmdFzf(repos)
 
 	// exit quietly if fzf process is cancelled
 	if err != nil && strings.Contains(err.Error(), "exit status 130") {
