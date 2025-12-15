@@ -17,6 +17,7 @@ var (
 )
 
 type Config struct {
+	Env                string
 	Worktree           string
 	GitDir             string `toml:"git-dir"`
 	Origin             string
