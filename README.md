@@ -11,11 +11,14 @@ The below settings are for demonstration in keeping with the
 [bare repo dotfiles tutorial on Atlassian](https://www.atlassian.com/git/tutorials/dotfiles)
 
 ```toml
+env = "example" # or `export DOTF_ENV=example` in shell config
 worktree = "/Users/<user>" # note: must be absolute path (no $HOME, ~/, etc.. yet)
 gitdir = "/Users/<user>/.cfg/" # the bare git repo root
 origin = "<read+write url for origin>" # eg, git@yourhost.com:user/dotfiles
 batch-commit-message = "batch dotf update" # used by `dotf m --prime` for module commit message
-modules = ["~/path/to/repo1", "~/path/to/repo2"] # like git submodles, but not a part of  the bare repo
+
+[modules.default]
+paths = ["~/path/to/repo1", "~/path/to/repo2"]
 ```
 
 For example, my config
@@ -49,9 +52,37 @@ relationship to your bare dotfiles respository. You can clone a repo somewhere
 on your system, add its path to the `modules` array in the `config.toml` and
 then list, edit, pull, commit and push with the `m` command: `dotf m --list`.
 
-Submodules are therefore still available for you to use as normal: `dotf
-submodule add ...`, etc. As all Git commands apart from those intercepted in
-this program are _passed to your bare dotfiles Git repository_.
+The `modules.default` group will _always_ be included. You can use this as a
+base group of modules used across systems. Any repos specific to certain systems
+(e.g., work and personal) can be included in their own groups.
+
+A non-default grouped module will only be included if the `DOTF_ENV` shell
+variable or the `env` key in the `config.toml` are set. This allows you your
+`dotf` config to be portable across systems while still enabling alternate
+module setups.
+
+If you do not want to have any modules included by default, simply don't use the
+`modules.default` group.
+
+```bash
+export DOTF_ENV=work
+```
+
+```toml
+[modules.default] # present on all systems you work on
+paths = ["~/path/to/repo1", "~/path/to/repo2"]
+
+[modules.work]
+paths = ["~/path/to/work/repo1"]
+
+[modules.personal] # will not be included on work computer
+paths = ["~/path/to/personal/repo1"]
+```
+
+Submodules are still available for you to use as normal if you prefer:
+`dotf
+submodule add ...`, etc. As all Git commands apart from those intercepted
+in this program are _passed to your bare dotfiles Git repository_.
 
 ## Usage
 
@@ -59,7 +90,6 @@ All `git` commands are passed as normal. Some are intercepted and handled
 differently, some are unique:
 
 ```markdown
-
 `dotf m --list`: list all tracked modules.
 
 `dotf m --edit`: search module directories with `fzf`, opening selected with
@@ -67,8 +97,8 @@ $EDITOR (defaults to vim).
 
 `dotf m --pull`: pull upstream changes from all modules.
 
-`dotf m --prime`: add (with `git add -A`) and commit all changes to all
-modules. Commit message is set in `config.toml`.
+`dotf m --prime`: add (with `git add -A`) and commit all changes to all modules.
+Commit message is set in `config.toml`.
 
 `dotf m --push`: push local changes of all modules.
 
@@ -86,10 +116,9 @@ dotf status
 dotf log --oneline
 dotf rebase -i HEAD~2
 ...
-
 ```
 
 ## Author
 
-Tillman Jex \
+Tillman Jex\
 [www.tjex.net](https://tjex.net)

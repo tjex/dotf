@@ -2,6 +2,7 @@ package dotf
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"git.sr.ht/~tjex/dotf/cmd"
@@ -16,9 +17,11 @@ func getModulePaths() []string {
 	var paths []string
 	env := util.ResolveEnvironment()
 
+
 	modules := &cfg.Modules
 	for name, m := range *modules {
-		if name != env {
+		// modules.default are always included
+		if (name != env && name != "default") {
 			continue
 		}
 		for _, p := range m.Paths {
@@ -35,8 +38,8 @@ func getModulePaths() []string {
 func Prime() {
 	message := &cfg.BatchCommitMessage
 
-	paths := getModulePaths()
-	for _, p := range paths {
+	pathsReceived := getModulePaths()
+	for _, p := range pathsReceived {
 
 		repo, err := util.ExpandPath(p)
 		if err != nil {
@@ -94,23 +97,29 @@ func Sync() {
 
 // Return paths to all submodules
 func List() {
-	paths := getModulePaths()
-	for _, p := range paths {
-		fmt.Println(p)
-
+	pathsReceived := getModulePaths()
+	var paths []string
+	for _, path := range pathsReceived {
+		paths = append(paths, path)
 	}
+	sort.Strings(paths)
+	for _, path := range paths {
+		fmt.Println(path)
+	}
+
 }
 
 func Edit() {
 	// get submodule paths
-	var repos []string
-	paths := getModulePaths()
-	for _, p := range paths {
-		repos = append(repos, p)
+	var paths []string
+	pathsReceived := getModulePaths()
+	for _, p := range pathsReceived {
+		paths = append(paths, p)
 	}
 
+	sort.Strings(paths)
 	// return choice from fzf selection
-	var choice, err = cmd.CmdFzf(repos)
+	var choice, err = cmd.CmdFzf(paths)
 
 	// exit quietly if fzf process is cancelled
 	if err != nil && strings.Contains(err.Error(), "exit status 130") {
