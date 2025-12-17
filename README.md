@@ -8,12 +8,15 @@ convenient.
 `dotf` expects to find a config file at `${XDG_CONFIG_HOME}/dotf/config.toml`.
 
 The below settings are for demonstration in keeping with the
-[bare repo dotfiles tutorial on Atlassian](https://www.atlassian.com/git/tutorials/dotfiles)
+[bare repo dotfiles tutorial on Atlassian](https://www.atlassian.com/git/tutorials/dotfiles). 
+
+Go through the tutorial first, if the concept of tracking system configurations
+with a bare git repostiory is new to you.
 
 ```toml
 env = "example" # or `export DOTF_ENV=example` in shell config
-worktree = "/Users/<user>" # note: must be absolute path (no $HOME, ~/, etc.. yet)
-gitdir = "/Users/<user>/.cfg/" # the bare git repo root
+worktree = "/home/<user>" # note: must be absolute path (no $HOME, ~/, etc.. yet)
+gitdir = "/home/<user>/.cfg/" # the bare git repo root
 origin = "<read+write url for origin>" # eg, git@yourhost.com:user/dotfiles
 batch-commit-message = "batch dotf update" # used by `dotf m --prime` for module commit message
 
@@ -33,8 +36,6 @@ For example, my config
 
 To get version tags, first fetch all tags with `git fetch --all --tags` and then
 run `git tag`.
-
-This repo is also [mirrored on GitHub](https://github.com/tjex/dotf).
 
 ## Modules
 
