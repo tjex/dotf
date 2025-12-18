@@ -17,11 +17,10 @@ func getModulePaths() []string {
 	var paths []string
 	env := util.ResolveEnvironment()
 
-
 	modules := &cfg.Modules
 	for name, m := range *modules {
 		// modules.default are always included
-		if (name != env && name != "default") {
+		if name != env && name != "default" {
 			continue
 		}
 		for _, p := range m.Paths {
@@ -59,7 +58,6 @@ func Prime() {
 func Push() {
 	paths := getModulePaths()
 	for _, p := range paths {
-
 		repo, err := util.ExpandPath(p)
 		if err != nil {
 			fmt.Println(err)
@@ -68,6 +66,8 @@ func Push() {
 		if wantsPush {
 			fmt.Println("Pushing", repo)
 			git.Push(repo)
+		} else {
+			fmt.Println("Checking", repo)
 		}
 	}
 }
@@ -83,6 +83,8 @@ func Pull() {
 		if wantsPull {
 			fmt.Println("Pulling", repo)
 			git.Pull(repo)
+		} else {
+			fmt.Println("Checking", repo)
 		}
 	}
 }
