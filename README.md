@@ -8,7 +8,7 @@ convenient.
 `dotf` expects to find a config file at `${XDG_CONFIG_HOME}/dotf/config.toml`.
 
 The below settings are for demonstration in keeping with the
-[bare repo dotfiles tutorial on Atlassian](https://www.atlassian.com/git/tutorials/dotfiles). 
+[bare repo dotfiles tutorial on Atlassian](https://www.atlassian.com/git/tutorials/dotfiles).
 
 Go through the tutorial first, if the concept of tracking system configurations
 with a bare git repostiory is new to you.
@@ -81,8 +81,7 @@ paths = ["~/path/to/personal/repo1"]
 ```
 
 Submodules are still available for you to use as normal if you prefer:
-`dotf
-submodule add ...`, etc. As all Git commands apart from those intercepted
+`dotf submodule add ...`, etc. As all Git commands apart from those intercepted
 in this program are _passed to your bare dotfiles Git repository_.
 
 ## Usage
@@ -106,6 +105,8 @@ Commit message is set in `config.toml`.
 `dotf pull`: pull bare dotfiles repository from origin.
 
 `dotf push`: push bare dotfiles repository to origin.
+
+`dotf ... -q`: only output errors.
 
 `dotf --help`: display help for dotf or git (interactively)
 ```

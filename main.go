@@ -7,20 +7,13 @@ import (
 	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/cmd/dotf"
 	"git.sr.ht/~tjex/dotf/internal/config"
+	"git.sr.ht/~tjex/dotf/internal/printer"
 	"github.com/alexflint/go-arg"
 )
 
-type moduleCmd struct {
-	Prime bool `arg:"--prime" default:"false" help:"add and commit all changes to all modules"`
-	Push bool `arg:"--push" default:"false" help:"pushes all modules to their remotes."`
-	Pull bool `arg:"--pull" default:"false" help:"pulls all modules from their remotes."`
-	List  bool `arg:"-l,--list" default:"false" help:"list all tracked modules"`
-	Edit  bool `arg:"-e, --edit" default:"false" help:"cd into selected module via fzf"`
-}
-
-
 var args struct {
-	Module   *moduleCmd   `arg:"subcommand:m" help:"operations for git modules."`
+	ModuleCmd *dotf.ModuleCmd `arg:"subcommand:m" help:"operations for git modules."`
+	Quiet     bool            `arg:"-q,--quiet" help:"Only display error messages."`
 }
 
 func main() {
@@ -39,21 +32,14 @@ func main() {
 
 	p.Parse(stdinArgs)
 
+	printer := printer.NewPrinter(args.Quiet)
+
 	switch {
-	case args.Module != nil:
-		// positional flags for `sm`
-		switch {
-		case args.Module.Prime:
-			dotf.Prime()
-		case args.Module.Push:
-			dotf.Push()
-		case args.Module.Pull:
-			dotf.Pull()
-		case args.Module.List:
-			dotf.List()
-		case args.Module.Edit:
-			dotf.Edit()
-		default:
+	case args.ModuleCmd != nil:
+		m := &dotf.Module{Printer: printer, Cmd: args.ModuleCmd}
+
+		if err := m.Run(printer); err != nil {
+			printer.Println(fmt.Sprintf("Error: %v", err))
 			p.WriteHelp(os.Stdout)
 		}
 	default:
@@ -64,10 +50,10 @@ func main() {
 			var choice string
 			fmt.Println("dotf wraps around git. \nDisplay help for dotf (d) or git (g)?")
 			fmt.Scan(&choice)
-			switch {
-			case choice == "d":
+			switch choice {
+			case "d":
 				p.WriteHelp(os.Stdout)
-			case choice == "g":
+			case "g":
 				cmd.DotfExecute(stdinArgs)
 			}
 		}
