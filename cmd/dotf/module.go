@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 
 	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/internal/config"
@@ -72,55 +73,85 @@ func (m *Module) prime() {
 	m.Printer.Println("Checking which repos have uncommitted changes...")
 	message := &cfg.BatchCommitMessage
 
-	pathsReceived := getModulePaths()
-	for _, p := range pathsReceived {
+	paths := getModulePaths()
 
-		repo, err := util.ExpandPath(p)
-		if err != nil {
-			m.Printer.Println(err)
-		}
+	var wg sync.WaitGroup
+	wg.Add(len(paths))
 
-		report := git.Status(repo)
-		// clean repo returns an empty string
-		if report != "" {
-			m.Printer.Println("Priming", repo)
-			git.Add(repo)
-			git.Commit(repo, message)
-		}
+	for _, p := range paths {
+		go func(p string) {
+			defer wg.Done()
+
+			repo, err := util.ExpandPath(p)
+			if err != nil {
+				m.Printer.Println(err)
+			}
+
+			report := git.Status(repo)
+			// clean repo returns an empty string
+			if report != "" {
+				m.Printer.Println("Priming", repo)
+				git.Add(repo)
+				git.Commit(repo, message)
+			}
+		}(p)
 	}
+
+	wg.Wait()
 }
 
 func (m *Module) push() {
 	m.Printer.Println("Checking which repos need pushing...")
 	paths := getModulePaths()
+
+	var wg sync.WaitGroup
+	wg.Add(len(paths))
+
 	for _, p := range paths {
-		repo, err := util.ExpandPath(p)
-		if err != nil {
-			m.Printer.Println(err)
-		}
-		wantsPush, _ := git.SyncState(repo)
-		if wantsPush {
-			m.Printer.Println("Pushing", repo)
-			git.Push(repo)
-		}
+		go func(p string) {
+			defer wg.Done()
+
+			repo, err := util.ExpandPath(p)
+			if err != nil {
+				m.Printer.Println(err)
+				return
+			}
+
+			wantsPush, _ := git.SyncState(repo)
+			if wantsPush {
+				m.Printer.Println("Pushing", repo)
+				git.Push(repo)
+			}
+		}(p)
 	}
+
+	wg.Wait()
 }
 
 func (m *Module) pull() {
 	m.Printer.Println("Checking which repos need pulling...")
-	paths := getModulePaths()
-	for _, p := range paths {
-		repo, err := util.ExpandPath(p)
-		if err != nil {
-			m.Printer.Println(err)
-		}
-		_, wantsPull := git.SyncState(repo)
-		if wantsPull {
-			m.Printer.Println("Pulling:", repo)
-			git.Pull(repo)
-		}
 
+	paths := getModulePaths()
+
+	var wg sync.WaitGroup
+	wg.Add(len(paths))
+
+	for _, p := range paths {
+		go func(p string) {
+			defer wg.Done()
+			repo, err := util.ExpandPath(p)
+			if err != nil {
+				m.Printer.Println(err)
+			}
+			_, wantsPull := git.SyncState(repo)
+			if wantsPull {
+				m.Printer.Println("Pulling:", repo)
+				git.Pull(repo)
+			}
+
+		}(p)
 	}
+	wg.Wait()
 }
 
 // TODO
