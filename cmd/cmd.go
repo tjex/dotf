@@ -115,22 +115,6 @@ func DotfExecute(gitArgs []string) {
 
 }
 
-// Execute dotf command, but write output to buffer and return
-// (for handling via channels). Can only be used where plain output suffices.
-func DotfExecuteRoutine(gitArgs []string) string {
-	var out bytes.Buffer
-	argsArray := buildArgsArray(gitArgs)
-	// cmd.Stderr = os.Stderr was writing regular messages to stdout
-	// (e.g. printing normal git messages to terminal)?...
-	cmd := exec.Command("git", argsArray...)
-	cmd.Stdout = &out
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = &out
-	cmd.Run() // errors are returned and handled by git itself
-
-	return out.String()
-}
-
 // Build the arguments array for dotf git call
 func buildArgsArray(gitArgs []string) []string {
 	conf := config.UserConfig()
