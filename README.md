@@ -87,7 +87,8 @@ in this program are _passed to your bare dotfiles Git repository_.
 ## Usage
 
 All `git` commands are passed as normal. Some are intercepted and handled
-differently, some are unique:
+differently, some are unique. `dotf m ...` commands range over module paths in
+your `config.toml`, and run as goroutines:
 
 ```markdown
 `dotf m --list`: list all tracked modules.
