@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/cmd/dotf"
@@ -15,6 +16,10 @@ var args struct {
 	ModuleCmd *dotf.ModuleCmd `arg:"subcommand:m" help:"operations for git modules."`
 	Quiet     bool            `arg:"-q,--quiet" help:"Only display error messages."`
 }
+
+var (
+	Version = "dev"
+)
 
 func main() {
 	config.ReadUserConfig()
@@ -44,7 +49,11 @@ func main() {
 		}
 	default:
 		// If arguments above aren't called, nor is `--help`
-		if os.Args[1] != "--help" && os.Args[1] != "-h" {
+		if os.Args[1] == "--version" || os.Args[1] == "-v" {
+			v, _ := strings.CutPrefix(Version, "v")
+			fmt.Println("dotf version", v)
+			cmd.DotfExecute(stdinArgs) // prints git version
+		} else if os.Args[1] != "--help" && os.Args[1] != "-h" {
 			cmd.DotfExecute(stdinArgs)
 		} else {
 			var choice string
