@@ -14,11 +14,11 @@ Go through the tutorial first, if the concept of tracking system configurations
 with a bare git repostiory is new to you.
 
 ```toml
-env = "example" # or `export DOTF_ENV=example` in shell config
-worktree = "/home/<user>" # note: must be absolute path (no $HOME, ~/, etc.. yet)
-gitdir = "/home/<user>/.cfg/" # the bare git repo root
-origin = "<read+write url for origin>" # eg, git@yourhost.com:user/dotfiles
-batch-commit-message = "batch dotf update" # used by `dotf m --prime` for module commit message
+env = "example" # or `export DOTF_ENV=example` in shell config.
+worktree = "${HOME}" # the bare repo's root directory (all files deeper can be tracked).
+gitdir = "~/.cfg/" # the location of the bare repo git directory (i.e, git config, hooks, etc).
+origin = "<read+write url for origin>" # eg, git@yourhost.com:user/dotfiles.
+batch-commit-message = "batch dotf update" # used by `dotf m --prime` for module commit message.
 
 [modules.default]
 paths = ["~/path/to/repo1", "~/path/to/repo2"]
