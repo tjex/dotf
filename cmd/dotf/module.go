@@ -31,7 +31,7 @@ type Module struct {
 
 func getModulePaths() []string {
 	var paths []string
-	env := util.ResolveEnvironment()
+	env := util.ResolveEnvironment(cfg.Env)
 
 	modules := &cfg.Modules
 	for name, m := range *modules {

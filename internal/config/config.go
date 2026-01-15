@@ -1,17 +1,16 @@
 package config
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 
+	"git.sr.ht/~tjex/dotf/internal/util"
 	toml "github.com/pelletier/go-toml/v2"
 )
 
 var (
-	buf    bytes.Buffer
 	logger = log.New(os.Stdout, "", log.Lshortfile)
 	cfg    Config
 )
@@ -36,7 +35,7 @@ func UserConfig() *Config {
 }
 
 // reads user configuration from a .toml file
-func ReadUserConfig() {
+func ReadUserConfig() error {
 	path := configDir()
 	confFile := filepath.Join(path, "config.toml")
 	if _, err := os.Stat(confFile); os.IsNotExist(err) {
@@ -53,10 +52,20 @@ func ReadUserConfig() {
 		logger.Print(err)
 	}
 
+	gitDir, err := util.ExpandPath(cfg.GitDir)
+	if err != nil {
+		return err
+	}
+	worktree, err := util.ExpandPath(cfg.Worktree)
+	if err != nil {
+		return err
+	}
+
 	// set git flags
 	var flags []string
-	flags = append(flags, "--git-dir", cfg.GitDir, "--work-tree", cfg.Worktree)
+	flags = append(flags, "--git-dir", gitDir, "--work-tree", worktree)
 	cfg.RepoFlags = flags
+	return nil
 }
 
 func configDir() string {

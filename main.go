@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -24,7 +25,11 @@ var (
 )
 
 func main() {
-	config.ReadUserConfig()
+	err := config.ReadUserConfig()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	stdinArgs := os.Args[1:]
 	p, err := arg.NewParser(arg.Config{Program: "dotf", Exit: os.Exit}, &args)
 	if err != nil {
