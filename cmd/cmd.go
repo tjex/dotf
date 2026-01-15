@@ -11,7 +11,6 @@ import (
 	"git.sr.ht/~tjex/dotf/internal/config"
 )
 
-var emptyBytes = make([]byte, 128)
 
 // A regular exec.Command but stdout and stderr merged and returned as strings.
 func Cmd(prog string, args []string) string {
@@ -105,8 +104,11 @@ func CmdEditor(path string) {
 // bare git repository specs
 
 // Execute a regular dotf command (non-concurrent)
-func DotfExecute(gitArgs []string) {
+func DotfExecute(gitArgs []string, quiet bool) {
 	argsArray := buildArgsArray(gitArgs)
+	if quiet {
+		argsArray = append(argsArray, "--quiet")
+	}
 	cmd := exec.Command("git", argsArray...)
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin

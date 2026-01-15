@@ -70,7 +70,7 @@ func (m *Module) Run(printer *printer.Printer) error {
 // There's not real need to check if the repo is dirty. The failure is quick and
 // has no side effects.
 func (m *Module) prime() {
-	m.Printer.Println("Checking which repos have uncommitted changes...")
+	m.Printer.Println("Checking which modules have uncommitted changes...")
 	message := &cfg.BatchCommitMessage
 
 	paths := getModulePaths()
@@ -101,7 +101,7 @@ func (m *Module) prime() {
 }
 
 func (m *Module) push() {
-	m.Printer.Println("Checking which repos need pushing...")
+	m.Printer.Println("Checking which modules need pushing...")
 	paths := getModulePaths()
 
 	var wg sync.WaitGroup
@@ -129,7 +129,7 @@ func (m *Module) push() {
 }
 
 func (m *Module) pull() {
-	m.Printer.Println("Checking which repos need pulling...")
+	m.Printer.Println("Checking which modules need pulling...")
 
 	paths := getModulePaths()
 
@@ -152,14 +152,6 @@ func (m *Module) pull() {
 		}(p)
 	}
 	wg.Wait()
-}
-
-// TODO
-func Sync() {
-	// pull
-	// prime
-	// push
-	// needs to handle merge conflict reports etc
 }
 
 // Return paths to all submodules

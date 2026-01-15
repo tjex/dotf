@@ -7,6 +7,7 @@ import (
 
 	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/cmd/dotf"
+	"git.sr.ht/~tjex/dotf/cmd/sync"
 	"git.sr.ht/~tjex/dotf/internal/config"
 	"git.sr.ht/~tjex/dotf/internal/printer"
 	"github.com/alexflint/go-arg"
@@ -14,6 +15,7 @@ import (
 
 var args struct {
 	ModuleCmd *dotf.ModuleCmd `arg:"subcommand:m" help:"operations for git modules."`
+	SyncCmd   *sync.SyncCmd   `arg:"subcommand:sync" help:"Sync remote and local with latest changes (i.e, pull all -> push all)."`
 	Quiet     bool            `arg:"-q,--quiet" help:"Only display error messages."`
 }
 
@@ -40,6 +42,13 @@ func main() {
 	printer := printer.NewPrinter(args.Quiet)
 
 	switch {
+	case args.SyncCmd != nil:
+		s := &sync.Sync{Printer: printer, Cmd: args.SyncCmd}
+
+		if err := s.Run(printer); err != nil {
+			printer.Println(fmt.Sprintf("Error: %v", err))
+			p.WriteHelp(os.Stdout)
+		}
 	case args.ModuleCmd != nil:
 		m := &dotf.Module{Printer: printer, Cmd: args.ModuleCmd}
 
@@ -52,9 +61,9 @@ func main() {
 		if os.Args[1] == "--version" || os.Args[1] == "-v" {
 			v, _ := strings.CutPrefix(Version, "v")
 			fmt.Println("dotf version", v)
-			cmd.DotfExecute(stdinArgs) // prints git version
+			cmd.DotfExecute(stdinArgs, args.Quiet) // prints git version
 		} else if os.Args[1] != "--help" && os.Args[1] != "-h" {
-			cmd.DotfExecute(stdinArgs)
+			cmd.DotfExecute(stdinArgs, args.Quiet)
 		} else {
 			var choice string
 			fmt.Println("dotf wraps around git. \nDisplay help for dotf (d) or git (g)?")
@@ -63,7 +72,7 @@ func main() {
 			case "d":
 				p.WriteHelp(os.Stdout)
 			case "g":
-				cmd.DotfExecute(stdinArgs)
+				cmd.DotfExecute(stdinArgs, args.Quiet)
 			}
 		}
 	}

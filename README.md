@@ -90,31 +90,61 @@ All `git` commands are passed as normal. Some are intercepted and handled
 differently, some are unique. `dotf m ...` commands range over module paths in
 your `config.toml`, and run as goroutines:
 
-```markdown
-`dotf m --list`: list all tracked modules.
 
-`dotf m --edit`: search module directories with `fzf`, opening selected with
-$EDITOR (defaults to vim).
-
-`dotf m --pull`: pull upstream changes from all modules.
-
-`dotf m --prime`: add (with `git add -A`) and commit all changes to all modules.
-Commit message is set in `config.toml`.
-
-`dotf m --push`: push local changes of all modules.
-
-`dotf pull`: pull bare dotfiles repository from origin.
-
-`dotf push`: push bare dotfiles repository to origin.
-
-`dotf ... -q`: only output errors.
-
-`dotf --help`: display help for dotf or git (interactively)
-```
-
-Run all other git commands as normal:
+### Modules
 
 ```bash
+# List all tracked modules
+dotf m --list
+
+# Search module directories using fzf, open selected in $EDITOR (default: vim)
+dotf m --edit
+
+# Pull upstream changes from all modules
+dotf m --pull
+
+# Stage all changes (`git add -A`) and commit them for all modules
+# Commit message is defined in config.toml
+dotf m --prime
+
+# Push local changes of all modules
+dotf m --push
+```
+
+### Bare Repo
+
+```bash
+# Pull bare dotfiles repository from origin
+dotf pull
+
+# Push bare dotfiles repository to origin
+dotf push
+```
+
+### Sync
+
+```bash
+# Sync bare repository: pull and push
+dotf sync --bare
+
+# Sync all modules: pull and push
+dotf sync --modules
+
+# Sync both bare repo and modules
+dotf sync
+```
+
+### Misc
+
+```bash
+# Run commands quietly (errors only)
+dotf ... -q
+
+# Show interactive help for dotf or git
+dotf --help
+
+# All other commands will be passed as-is to Git (operating on the bare repo).
+
 dotf status
 dotf log --oneline
 dotf rebase -i HEAD~2
