@@ -45,10 +45,14 @@ func (s *Sync) syncBare() {
 
 func (s *Sync) syncModules() {
 	pull := &dotf.ModuleCmd{Pull: true}
+	prime := &dotf.ModuleCmd{Prime: true}
 	push := &dotf.ModuleCmd{Push: true}
 	module := &dotf.Module{Printer: s.Printer}
 
 	module.Cmd = pull
+	module.Run(s.Printer)
+
+	module.Cmd = prime
 	module.Run(s.Printer)
 
 	module.Cmd = push
