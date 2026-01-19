@@ -90,7 +90,7 @@ func (m *Module) prime() {
 			report := git.Status(repo)
 			// clean repo returns an empty string
 			if report != "" {
-				m.Printer.Println("Priming", repo)
+				m.Printer.Println("\t- Priming", repo)
 				git.Add(repo)
 				git.Commit(repo, message)
 			}
@@ -119,7 +119,7 @@ func (m *Module) push() {
 
 			wantsPush, _ := git.SyncState(repo)
 			if wantsPush {
-				m.Printer.Println("Pushing", repo)
+				m.Printer.Println("\t- Pushing", repo)
 				git.Push(repo)
 			}
 		}(p)
@@ -145,7 +145,7 @@ func (m *Module) pull() {
 			}
 			_, wantsPull := git.SyncState(repo)
 			if wantsPull {
-				m.Printer.Println("Pulling:", repo)
+				m.Printer.Println("\t- Pulling:", repo)
 				git.Pull(repo)
 			}
 
