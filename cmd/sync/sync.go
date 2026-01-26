@@ -1,7 +1,6 @@
 package sync
 
 import (
-	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/cmd/dotf"
 	"git.sr.ht/~tjex/dotf/internal/printer"
 )
@@ -39,8 +38,8 @@ func (s *Sync) sync() {
 }
 
 func (s *Sync) syncBare() {
-	cmd.DotfExecute([]string{"pull"}, s.Printer.Quiet)
-	cmd.DotfExecute([]string{"push"}, s.Printer.Quiet)
+	bare := dotf.Bare{Printer: s.Printer}
+	bare.Sync(s.Printer)
 }
 
 func (s *Sync) syncModules() {
