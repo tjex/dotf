@@ -11,17 +11,21 @@ type Bare struct {
 
 func (b *Bare) Sync(printer *printer.Printer) error {
 	b.Printer = printer
+	b.Printer.Println()
 	b.Printer.Println("Syncing bare repository...")
 	cmd.DotfExecute([]string{"pull"}, b.Printer.Quiet)
 	err := b.prime()
 	if err != nil {
 		return err
 	}
+	b.Printer.Println()
+	b.Printer.Println("Pushing bare repository...")
 	cmd.DotfExecute([]string{"push"}, b.Printer.Quiet)
 	return nil
 }
 
 func (b *Bare) prime() error {
+	b.Printer.Println()
 	b.Printer.Println("Priming bare repository...")
 	message := &cfg.BatchCommitMessage
 	cmd.DotfExecute([]string{"add", "-u"}, b.Printer.Quiet)
