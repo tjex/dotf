@@ -104,16 +104,19 @@ func CmdEditor(path string) {
 // bare git repository specs
 
 // Execute a regular dotf command (non-concurrent)
-func DotfExecute(gitArgs []string, quiet bool) {
+func DotfExecute(gitArgs []string, quiet bool) string {
 	argsArray := buildArgsArray(gitArgs)
 	if quiet {
 		argsArray = append(argsArray, "--quiet")
 	}
+	out := bytes.Buffer{}
 	cmd := exec.Command("git", argsArray...)
-	cmd.Stdout = os.Stdout
+	cmd.Stdout = &out
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
 	cmd.Run() // errors are returned and handled by git itself
+
+	return out.String()
 
 }
 

@@ -17,7 +17,11 @@ func SyncState(repoPath string) (bool, bool) {
 	fmt.Sscanf(out, "%d %d", &wantsPull, &wantsPush)
 
 	return wantsPull > 0, wantsPush > 0
+}
 
+func UncommittedChanges(repo string) bool {
+	out := cmd.Cmd("git", []string{"-C", repo, "status", "--porcelain"})
+	return len(out) > 0
 }
 
 func Cmd(args []string) string {
@@ -40,7 +44,7 @@ func Commit(repo string, message *string) string {
 	return out
 }
 
-func Add(repo string) string {
+func AddAll(repo string) string {
 	out := cmd.Cmd("git", []string{"-C", repo, "add", "-A"})
 	return out
 }

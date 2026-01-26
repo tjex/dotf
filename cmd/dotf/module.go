@@ -91,7 +91,7 @@ func (m *Module) prime() {
 			// clean repo returns an empty string
 			if report != "" {
 				m.Printer.Println("\t- Priming", repo)
-				git.Add(repo)
+				git.AddAll(repo)
 				git.Commit(repo, message)
 			}
 		}(p)
