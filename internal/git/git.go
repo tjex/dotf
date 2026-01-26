@@ -1,24 +1,23 @@
 package git
 
 import (
-	"regexp"
+	"fmt"
 
 	"git.sr.ht/~tjex/dotf/cmd"
 )
 
-// Returns whether local branch wants a push / pull
+// Returns whether local branch wants a pull / push
 func SyncState(repoPath string) (bool, bool) {
-	// Refresh state so subsequent commands know if pull or push is needed.
-	fetch := []string{"-C", repoPath, "fetch", "--prune"}
-	cmd.Cmd("git", fetch)
+	cmd.Cmd("git", []string{"-C", repoPath, "fetch", "--quiet"})
 
-	args := []string{"-C", repoPath, "rev-list", "--left-right", "--count", "HEAD...@{u}"} 
-	out := cmd.Cmd("git", args)
+	fetch := []string{"-C", repoPath, "rev-list", "--left-right", "--count", "@{upstream}...HEAD"}
+	out := cmd.Cmd("git", fetch)
 
-	wantsPush, _ := regexp.MatchString(`^([1-9]\d*)\s+[0-9]\d*`, out)
-	wantsPull, _ := regexp.MatchString(`^[0-9]\d*\s+([1-9]\d*)`, out)
+	var wantsPull, wantsPush int
+	fmt.Sscanf(out, "%d %d", &wantsPull, &wantsPush)
 
-	return wantsPush, wantsPull
+	return wantsPull > 0, wantsPush > 0
+
 }
 
 func Cmd(args []string) string {
@@ -36,17 +35,15 @@ func Pull(repo string) string {
 	return out
 }
 
-func Commit(repo string , message *string) string {
+func Commit(repo string, message *string) string {
 	out := cmd.Cmd("git", []string{"-C", repo, "commit", "-m", *message})
 	return out
 }
-
 
 func Add(repo string) string {
 	out := cmd.Cmd("git", []string{"-C", repo, "add", "-A"})
 	return out
 }
-
 
 func Status(repo string) string {
 	out := cmd.Cmd("git", []string{"-C", repo, "status", "--porcelain"})

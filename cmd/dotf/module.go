@@ -117,7 +117,7 @@ func (m *Module) push() {
 				return
 			}
 
-			wantsPush, _ := git.SyncState(repo)
+			_, wantsPush := git.SyncState(repo)
 			if wantsPush {
 				m.Printer.Println("\t- Pushing", repo)
 				git.Push(repo)
@@ -143,7 +143,7 @@ func (m *Module) pull() {
 			if err != nil {
 				m.Printer.Println(err)
 			}
-			_, wantsPull := git.SyncState(repo)
+			wantsPull, _ := git.SyncState(repo)
 			if wantsPull {
 				m.Printer.Println("\t- Pulling:", repo)
 				git.Pull(repo)
