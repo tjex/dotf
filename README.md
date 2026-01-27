@@ -100,6 +100,9 @@ dotf m --list
 # Search module directories using fzf, open selected in $EDITOR (default: vim)
 dotf m --edit
 
+# Check status of modules `git status -s`
+dotf m --status
+
 # Pull upstream changes from all modules
 dotf m --pull
 

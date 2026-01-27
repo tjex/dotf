@@ -1,7 +1,6 @@
 package dotf
 
 import (
-	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/internal/git"
 	"git.sr.ht/~tjex/dotf/internal/printer"
 	"git.sr.ht/~tjex/dotf/internal/util"
@@ -28,20 +27,24 @@ func (b *Bare) Sync(printer *printer.Printer) error {
 	wantsPull, _ := git.SyncState(bareRepo)
 
 	if wantsPull {
-		cmd.DotfExecute([]string{"pull"}, b.Printer.Quiet)
+		out := git.Dotf([]string{"pull"})
+		printer.Println(out)
 	}
 
 	b.Printer.Println("Priming bare repository...")
 
-	cmd.DotfExecute([]string{"add", "-u"}, false) // add doesnt have a --quiet flag
+	var out string
+	out = git.Dotf([]string{"add", "-u"}) // add doesnt have a --quiet flag
+	printer.Println(out)
 
 	if dirty := git.UncommittedChanges(bareRepo, worktree); dirty {
 		message := &cfg.BatchCommitMessage
-		cmd.DotfExecute([]string{"commit", "-m", *message}, b.Printer.Quiet)
+		out := git.Dotf([]string{"commit", "-m", *message})
+		printer.Println(out)
 	}
 
 	b.Printer.Println("Pushing bare repository...")
-	cmd.DotfExecute([]string{"push"}, b.Printer.Quiet)
+	out = git.Dotf([]string{"push"})
+	printer.Println(out)
 	return nil
 }
-

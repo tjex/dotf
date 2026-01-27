@@ -7,8 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"git.sr.ht/~tjex/dotf/internal/config"
 )
 
 // A regular exec.Command but stdout and stderr merged and returned as strings.
@@ -97,34 +95,4 @@ func CmdEditor(path string) {
 	}
 	cmd.Run()
 
-}
-
-// A dotf command is a git command with flags set as per the user's
-// bare git repository specs
-
-// Execute a regular dotf command (non-concurrent)
-func DotfExecute(gitArgs []string, quiet bool) {
-	argsArray := buildArgsArray(gitArgs)
-	if quiet {
-		argsArray = append(argsArray, "--quiet")
-	}
-	cmd := exec.Command("git", argsArray...)
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
-	cmd.Run() // errors are returned and handled by git itself
-
-}
-
-// Build the arguments array for dotf git call
-func buildArgsArray(gitArgs []string) []string {
-	conf := config.UserConfig()
-	var argsArray []string
-
-	// force color output
-	argsArray = append(argsArray, "-c", "color.status=always")
-	argsArray = append(argsArray, conf.RepoFlags...)
-	argsArray = append(argsArray, gitArgs...)
-
-	return argsArray
 }

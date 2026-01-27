@@ -17,11 +17,12 @@ import (
 var cfg = config.UserConfig()
 
 type ModuleCmd struct {
-	Prime bool `arg:"--prime" default:"false" help:"add and commit all changes to all modules"`
-	Push  bool `arg:"--push" default:"false" help:"pushes all modules to their remotes."`
-	Pull  bool `arg:"--pull" default:"false" help:"pulls all modules from their remotes."`
-	List  bool `arg:"-l,--list" default:"false" help:"list all tracked modules"`
-	Edit  bool `arg:"-e, --edit" default:"false" help:"cd into selected module via fzf"`
+	Status bool `arg:"--status" default:"false" help:"show 'git status -s' for all modules"`
+	Prime  bool `arg:"--prime" default:"false" help:"add and commit all changes to all modules"`
+	Push   bool `arg:"--push" default:"false" help:"pushes all modules to their remotes."`
+	Pull   bool `arg:"--pull" default:"false" help:"pulls all modules from their remotes."`
+	List   bool `arg:"-l,--list" default:"false" help:"list all tracked modules"`
+	Edit   bool `arg:"-e, --edit" default:"false" help:"cd into selected module via fzf"`
 }
 
 type Module struct {
@@ -50,6 +51,8 @@ func getModulePaths() []string {
 func (m *Module) Run(printer *printer.Printer) error {
 	m.Printer = printer
 	switch {
+	case m.Cmd.Status:
+		m.status()
 	case m.Cmd.Prime:
 		m.prime()
 	case m.Cmd.Push:
@@ -195,4 +198,36 @@ func edit() {
 		fmt.Println(err)
 	}
 	cmd.CmdEditor(choice)
+}
+
+func (m *Module) status() {
+	pathsReceived := getModulePaths()
+	var paths []string
+	for _, path := range pathsReceived {
+		paths = append(paths, path)
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(len(paths))
+
+	for _, p := range paths {
+		go func(p string) {
+			defer wg.Done()
+
+			repo, err := util.ExpandPath(p)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			report := git.Status(repo)
+			// clean repo returns an empty string
+			if report != "" {
+				m.Printer.Println("Changes in", repo+":")
+				m.Printer.Println(report)
+			}
+		}(p)
+	}
+
+	wg.Wait()
 }

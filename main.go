@@ -6,10 +6,10 @@ import (
 	"os"
 	"strings"
 
-	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/cmd/dotf"
 	"git.sr.ht/~tjex/dotf/cmd/sync"
 	"git.sr.ht/~tjex/dotf/internal/config"
+	"git.sr.ht/~tjex/dotf/internal/git"
 	"git.sr.ht/~tjex/dotf/internal/printer"
 	"github.com/alexflint/go-arg"
 )
@@ -66,9 +66,11 @@ func main() {
 		if os.Args[1] == "--version" || os.Args[1] == "-v" {
 			v, _ := strings.CutPrefix(Version, "v")
 			fmt.Println("dotf version", v)
-			cmd.DotfExecute(stdinArgs, args.Quiet) // prints git version
+			out := git.Dotf(stdinArgs) // prints git version
+			printer.Println(out)
 		} else if os.Args[1] != "--help" && os.Args[1] != "-h" {
-			cmd.DotfExecute(stdinArgs, args.Quiet)
+			out := git.Dotf(stdinArgs)
+			printer.Println(out)
 		} else {
 			var choice string
 			fmt.Println("dotf wraps around git. \nDisplay help for dotf (d) or git (g)?")
@@ -77,7 +79,8 @@ func main() {
 			case "d":
 				p.WriteHelp(os.Stdout)
 			case "g":
-				cmd.DotfExecute(stdinArgs, args.Quiet)
+				out := git.Dotf(stdinArgs)
+				printer.Println(out)
 			}
 		}
 	}

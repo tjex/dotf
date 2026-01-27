@@ -85,3 +85,4 @@ func BareRepoConfig() string {
 	gitConf := filepath.Join(cfg.GitDir, "config")
 	return gitConf
 }
+
