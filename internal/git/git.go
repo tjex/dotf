@@ -19,8 +19,8 @@ func SyncState(repoPath string) (bool, bool) {
 	return wantsPull > 0, wantsPush > 0
 }
 
-func UncommittedChanges(repo string) bool {
-	out := cmd.Cmd("git", []string{"-C", repo, "status", "--porcelain"})
+func UncommittedChanges(repo, worktree string) bool {
+	out := cmd.Cmd("git", []string{"-C", repo, "--work-tree", worktree, "status", "--porcelain"})
 	return len(out) > 0
 }
 

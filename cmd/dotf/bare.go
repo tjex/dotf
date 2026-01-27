@@ -1,10 +1,10 @@
 package dotf
 
 import (
-	"fmt"
-
 	"git.sr.ht/~tjex/dotf/cmd"
+	"git.sr.ht/~tjex/dotf/internal/git"
 	"git.sr.ht/~tjex/dotf/internal/printer"
+	"git.sr.ht/~tjex/dotf/internal/util"
 )
 
 type Bare struct {
@@ -15,7 +15,17 @@ func (b *Bare) Sync(printer *printer.Printer) error {
 	b.Printer = printer
 	b.Printer.Println("Syncing bare repository...")
 
-	wantsPull, _ := SyncState()
+	bareRepo, err := util.ExpandPath(cfg.GitDir)
+	if err != nil {
+		return err
+	}
+
+	worktree, err := util.ExpandPath(cfg.Worktree)
+	if err != nil {
+		return err
+	}
+
+	wantsPull, _ := git.SyncState(bareRepo)
 
 	if wantsPull {
 		cmd.DotfExecute([]string{"pull"}, b.Printer.Quiet)
@@ -25,7 +35,7 @@ func (b *Bare) Sync(printer *printer.Printer) error {
 
 	cmd.DotfExecute([]string{"add", "-u"}, false) // add doesnt have a --quiet flag
 
-	if dirty := UncommittedChanges(); dirty {
+	if dirty := git.UncommittedChanges(bareRepo, worktree); dirty {
 		message := &cfg.BatchCommitMessage
 		cmd.DotfExecute([]string{"commit", "-m", *message}, b.Printer.Quiet)
 	}
@@ -35,18 +45,3 @@ func (b *Bare) Sync(printer *printer.Printer) error {
 	return nil
 }
 
-func SyncState() (bool, bool) {
-	cmd.DotfExecute([]string{"fetch", "--quiet"}, true)
-
-	out := cmd.DotfExecute([]string{"rev-list", "--left-right", "--count", "@{upstream}...HEAD"}, true)
-
-	var wantsPull, wantsPush int
-	fmt.Sscanf(out, "%d %d", &wantsPull, &wantsPush)
-
-	return wantsPull > 0, wantsPush > 0
-}
-
-func UncommittedChanges() bool {
-	out := cmd.DotfExecute([]string{"status", "--porcelain"}, false)
-	return len(out) > 0
-}
