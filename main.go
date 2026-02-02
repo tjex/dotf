@@ -66,10 +66,18 @@ func main() {
 		if os.Args[1] == "--version" || os.Args[1] == "-v" {
 			v, _ := strings.CutPrefix(Version, "v")
 			fmt.Println("dotf version", v)
-			out := git.Dotf(stdinArgs) // prints git version
+			out, err := git.Dotf(stdinArgs) // prints git version
+			if err != nil {
+				fmt.Println(err.Error())
+				os.Exit(1)
+			}
 			printer.Println(out)
 		} else if os.Args[1] != "--help" && os.Args[1] != "-h" {
-			out := git.Dotf(stdinArgs)
+			out, err := git.Dotf(stdinArgs)
+			if err != nil {
+				fmt.Println(err.Error())
+				os.Exit(1)
+			}
 			printer.Println(out)
 		} else {
 			var choice string
@@ -79,7 +87,7 @@ func main() {
 			case "d":
 				p.WriteHelp(os.Stdout)
 			case "g":
-				out := git.Dotf(stdinArgs)
+				out, _ := git.Dotf(stdinArgs)
 				printer.Println(out)
 			}
 		}

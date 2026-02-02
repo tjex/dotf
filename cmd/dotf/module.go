@@ -120,7 +120,12 @@ func (m *Module) push() {
 				return
 			}
 
-			_, wantsPush := git.SyncState(repo)
+			_, wantsPush, err := git.SyncState(repo)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+
 			if wantsPush {
 				m.Printer.Println("\t- Pushing", repo)
 				git.Push(repo)
@@ -146,7 +151,11 @@ func (m *Module) pull() {
 			if err != nil {
 				m.Printer.Println(err)
 			}
-			wantsPull, _ := git.SyncState(repo)
+			wantsPull, _, err := git.SyncState(repo)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
 			if wantsPull {
 				m.Printer.Println("\t- Pulling:", repo)
 				git.Pull(repo)

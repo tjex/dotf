@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -10,7 +11,7 @@ import (
 )
 
 // A regular exec.Command but stdout and stderr merged and returned as strings.
-func Cmd(prog string, args []string) string {
+func Cmd(prog string, args []string) (string, error) {
 	var outStd bytes.Buffer
 	var outErr bytes.Buffer
 	cmd := exec.Command(prog, args...)
@@ -19,10 +20,10 @@ func Cmd(prog string, args []string) string {
 	cmd.Stderr = &outErr
 	cmd.Run()
 	if len(outErr.Bytes()) > 0 {
-		fmt.Fprintf(os.Stderr, "%v\n", outErr.String())
+		return "", errors.New(outErr.String())
 	}
 
-	return outStd.String()
+	return outStd.String(), nil
 }
 
 // Run fzf by piping arguments.

@@ -24,27 +24,48 @@ func (b *Bare) Sync(printer *printer.Printer) error {
 		return err
 	}
 
-	wantsPull, _ := git.SyncState(bareRepo)
+	wantsPull, _, err := git.SyncState(bareRepo)
+	if err != nil {
+		return err
+	}
 
 	if wantsPull {
-		out := git.Dotf([]string{"pull"})
+		out, err := git.Dotf([]string{"pull"})
+		if err != nil {
+			return err
+		}
 		printer.Println(out)
 	}
 
 	b.Printer.Println("Priming bare repository...")
 
 	var out string
-	out = git.Dotf([]string{"add", "-u"}) // add doesnt have a --quiet flag
+	out, err = git.Dotf([]string{"add", "-u"}) // add doesnt have a --quiet flag
+	if err != nil {
+		return err
+	}
+
 	printer.Println(out)
 
-	if dirty := git.UncommittedChanges(bareRepo, worktree); dirty {
+	dirty, err := git.UncommittedChanges(bareRepo, worktree)
+	if err != nil {
+		return err
+	}
+
+	if dirty {
 		message := &cfg.BatchCommitMessage
-		out := git.Dotf([]string{"commit", "-m", *message})
+		out, err := git.Dotf([]string{"commit", "-m", *message})
+		if err != nil {
+			return err
+		}
 		printer.Println(out)
 	}
 
 	b.Printer.Println("Pushing bare repository...")
-	out = git.Dotf([]string{"push"})
+	out, err = git.Dotf([]string{"push"})
+	if err != nil {
+		return err
+	}
 	printer.Println(out)
 	return nil
 }
