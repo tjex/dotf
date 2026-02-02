@@ -52,14 +52,12 @@ func main() {
 
 		if err := s.Run(printer); err != nil {
 			printer.Println(fmt.Sprintf("Error: %v", err))
-			p.WriteHelp(os.Stdout)
 		}
 	case args.ModuleCmd != nil:
 		m := &dotf.Module{Printer: printer, Cmd: args.ModuleCmd}
 
 		if err := m.Run(printer); err != nil {
 			printer.Println(fmt.Sprintf("Error: %v", err))
-			p.WriteHelp(os.Stdout)
 		}
 	default:
 		// If arguments above aren't called, nor is `--help`

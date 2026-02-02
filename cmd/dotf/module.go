@@ -30,6 +30,11 @@ type Module struct {
 	Cmd     *ModuleCmd
 }
 
+func errorFmt(repoPath string, err error) error {
+	e := fmt.Sprintf("(%s) %v", repoPath, err)
+	return errors.New(e)
+}
+
 func getModulePaths() []string {
 	var paths []string
 	env := util.ResolveEnvironment(cfg.Env)
@@ -50,15 +55,16 @@ func getModulePaths() []string {
 
 func (m *Module) Run(printer *printer.Printer) error {
 	m.Printer = printer
+	var err error
 	switch {
 	case m.Cmd.Status:
 		m.status()
 	case m.Cmd.Prime:
-		m.prime()
+		err = m.prime()
 	case m.Cmd.Push:
-		m.push()
+		err = m.push()
 	case m.Cmd.Pull:
-		m.pull()
+		err = m.pull()
 	case m.Cmd.List:
 		list()
 	case m.Cmd.Edit:
@@ -66,19 +72,20 @@ func (m *Module) Run(printer *printer.Printer) error {
 	default:
 		return errors.New("No flag provided to module command.")
 	}
-	return nil
+	return err
 }
 
 // Add and commit any unstaged changes in all modules.
 // There's not real need to check if the repo is dirty. The failure is quick and
 // has no side effects.
-func (m *Module) prime() {
+func (m *Module) prime() error {
 	m.Printer.Println("Checking which modules have uncommitted changes...")
 	message := &cfg.BatchCommitMessage
 
 	paths := getModulePaths()
 
 	var wg sync.WaitGroup
+	errCh := make(chan error, len(paths))
 	wg.Add(len(paths))
 
 	for _, p := range paths {
@@ -87,7 +94,8 @@ func (m *Module) prime() {
 
 			repo, err := util.ExpandPath(p)
 			if err != nil {
-				m.Printer.Println(err)
+				errCh <- errorFmt(repo, err)
+				return
 			}
 
 			report := git.Status(repo)
@@ -101,28 +109,35 @@ func (m *Module) prime() {
 	}
 
 	wg.Wait()
+	close(errCh)
+
+	for err := range errCh {
+		return err
+	}
+	return nil
 }
 
-func (m *Module) push() {
+func (m *Module) push() error {
 	m.Printer.Println("Checking which modules need pushing...")
 	paths := getModulePaths()
 
 	var wg sync.WaitGroup
-	wg.Add(len(paths))
+	errCh := make(chan error, len(paths)) // buffered to avoid goroutine blocking
 
+	wg.Add(len(paths))
 	for _, p := range paths {
 		go func(p string) {
 			defer wg.Done()
 
 			repo, err := util.ExpandPath(p)
 			if err != nil {
-				m.Printer.Println(err)
+				errCh <- errorFmt(repo, err)
 				return
 			}
 
 			_, wantsPush, err := git.SyncState(repo)
 			if err != nil {
-				fmt.Println(err.Error())
+				errCh <- errorFmt(repo, err)
 				return
 			}
 
@@ -134,14 +149,22 @@ func (m *Module) push() {
 	}
 
 	wg.Wait()
+	close(errCh)
+
+	for err := range errCh {
+		return err
+	}
+
+	return nil
 }
 
-func (m *Module) pull() {
+func (m *Module) pull() error {
 	m.Printer.Println("Checking which modules need pulling...")
 
 	paths := getModulePaths()
 
 	var wg sync.WaitGroup
+	errCh := make(chan error, len(paths))
 	wg.Add(len(paths))
 
 	for _, p := range paths {
@@ -149,11 +172,12 @@ func (m *Module) pull() {
 			defer wg.Done()
 			repo, err := util.ExpandPath(p)
 			if err != nil {
-				m.Printer.Println(err)
+				errCh <- errorFmt(repo, err)
+				return
 			}
 			wantsPull, _, err := git.SyncState(repo)
 			if err != nil {
-				fmt.Println(err.Error())
+				errCh <- errorFmt(repo, err)
 				return
 			}
 			if wantsPull {
@@ -164,6 +188,49 @@ func (m *Module) pull() {
 		}(p)
 	}
 	wg.Wait()
+	close(errCh)
+
+	for err := range errCh {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Module) status() error {
+	pathsReceived := getModulePaths()
+
+	var wg sync.WaitGroup
+	errCh := make(chan error, len(pathsReceived)) // buffered to avoid goroutine blocking
+
+	for _, p := range pathsReceived {
+		wg.Add(1)
+
+		go func(p string) {
+			defer wg.Done()
+
+			repo, err := util.ExpandPath(p)
+			if err != nil {
+				errCh <- errorFmt(repo, err)
+				return
+			}
+
+			report := git.Status(repo)
+			if report != "" {
+				m.Printer.Println("Changes in", repo+":")
+				m.Printer.Println(report)
+			}
+		}(p)
+	}
+
+	wg.Wait()
+	close(errCh)
+
+	for err := range errCh {
+		return err
+	}
+
+	return nil
 }
 
 // Return paths to all submodules
@@ -207,36 +274,4 @@ func edit() {
 		fmt.Println(err)
 	}
 	cmd.CmdEditor(choice)
-}
-
-func (m *Module) status() {
-	pathsReceived := getModulePaths()
-	var paths []string
-	for _, path := range pathsReceived {
-		paths = append(paths, path)
-	}
-
-	var wg sync.WaitGroup
-	wg.Add(len(paths))
-
-	for _, p := range paths {
-		go func(p string) {
-			defer wg.Done()
-
-			repo, err := util.ExpandPath(p)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-
-			report := git.Status(repo)
-			// clean repo returns an empty string
-			if report != "" {
-				m.Printer.Println("Changes in", repo+":")
-				m.Printer.Println(report)
-			}
-		}(p)
-	}
-
-	wg.Wait()
 }

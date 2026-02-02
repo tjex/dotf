@@ -19,6 +19,7 @@ type Sync struct {
 func (s *Sync) Run(printer *printer.Printer) error {
 
 	s.Printer = printer
+	var err error
 
 	switch {
 	case s.Cmd.SyncBare:
@@ -26,15 +27,20 @@ func (s *Sync) Run(printer *printer.Printer) error {
 	case s.Cmd.SyncModules:
 		s.syncModules()
 	default:
-		s.sync()
+		err = s.sync()
+	}
+
+	return err
+}
+
+func (s *Sync) sync() error {
+	s.syncBare()
+	err := s.syncModules()
+	if err != nil {
+		return err
 	}
 
 	return nil
-}
-
-func (s *Sync) sync() {
-	s.syncBare()
-	s.syncModules()
 }
 
 func (s *Sync) syncBare() {
@@ -42,18 +48,29 @@ func (s *Sync) syncBare() {
 	bare.Sync(s.Printer)
 }
 
-func (s *Sync) syncModules() {
+func (s *Sync) syncModules() error {
 	pull := &dotf.ModuleCmd{Pull: true}
 	prime := &dotf.ModuleCmd{Prime: true}
 	push := &dotf.ModuleCmd{Push: true}
 	module := &dotf.Module{Printer: s.Printer}
 
 	module.Cmd = pull
-	module.Run(s.Printer)
+	err := module.Run(s.Printer)
+	if err != nil {
+		return err
+	}
 
 	module.Cmd = prime
-	module.Run(s.Printer)
+	err = module.Run(s.Printer)
+	if err != nil {
+		return err
+	}
 
 	module.Cmd = push
-	module.Run(s.Printer)
+	err = module.Run(s.Printer)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
