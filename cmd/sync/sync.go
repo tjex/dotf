@@ -23,9 +23,9 @@ func (s *Sync) Run(printer *printer.Printer) error {
 
 	switch {
 	case s.Cmd.SyncBare:
-		s.syncBare()
+		err = s.syncBare()
 	case s.Cmd.SyncModules:
-		s.syncModules()
+		err = s.syncModules()
 	default:
 		err = s.sync()
 	}
@@ -34,8 +34,12 @@ func (s *Sync) Run(printer *printer.Printer) error {
 }
 
 func (s *Sync) sync() error {
-	s.syncBare()
-	err := s.syncModules()
+	err := s.syncBare()
+	if err != nil {
+		return err
+	}
+
+	err = s.syncModules()
 	if err != nil {
 		return err
 	}
@@ -43,9 +47,14 @@ func (s *Sync) sync() error {
 	return nil
 }
 
-func (s *Sync) syncBare() {
+func (s *Sync) syncBare() error {
 	bare := dotf.Bare{Printer: s.Printer}
-	bare.Sync(s.Printer)
+	err := bare.Sync(s.Printer)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *Sync) syncModules() error {
