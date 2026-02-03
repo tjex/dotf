@@ -45,14 +45,13 @@ func (b *Bare) Sync(printer *printer.Printer) error {
 		return err
 	}
 
-	printer.Println(out)
-
 	dirty, err := git.UncommittedChanges(bareRepo, worktree)
 	if err != nil {
 		return err
 	}
 
 	if dirty {
+		b.Printer.Println("Committing changes...")
 		message := &cfg.BatchCommitMessage
 		out, err := git.Dotf([]string{"commit", "-m", *message})
 		if err != nil {
@@ -61,11 +60,17 @@ func (b *Bare) Sync(printer *printer.Printer) error {
 		printer.Println(out)
 	}
 
-	b.Printer.Println("Pushing bare repository...")
-	out, err = git.Dotf([]string{"push"})
+	_, wantsPush, err := git.SyncState(bareRepo)
 	if err != nil {
 		return err
 	}
-	printer.Println(out)
+	if wantsPush {
+		b.Printer.Println("Pushing bare repository...")
+		out, err = git.Dotf([]string{"push"})
+		if err != nil {
+			return err
+		}
+		printer.Println(out)
+	}
 	return nil
 }
