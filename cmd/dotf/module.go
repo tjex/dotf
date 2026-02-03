@@ -25,7 +25,7 @@ type ModuleCmd struct {
 	Edit   bool `arg:"-e, --edit" default:"false" help:"cd into selected module via fzf"`
 }
 
-type Module struct {
+type Modules struct {
 	Printer *printer.Printer
 	Cmd     *ModuleCmd
 }
@@ -53,7 +53,7 @@ func getModulePaths() []string {
 	return paths
 }
 
-func (m *Module) Run(printer *printer.Printer) error {
+func (m *Modules) Run(printer *printer.Printer) error {
 	m.Printer = printer
 	var err error
 	switch {
@@ -78,7 +78,7 @@ func (m *Module) Run(printer *printer.Printer) error {
 // Add and commit any unstaged changes in all modules.
 // There's not real need to check if the repo is dirty. The failure is quick and
 // has no side effects.
-func (m *Module) prime() error {
+func (m *Modules) prime() error {
 	m.Printer.Println("Checking which modules have uncommitted changes...")
 	message := &cfg.BatchCommitMessage
 
@@ -117,7 +117,7 @@ func (m *Module) prime() error {
 	return nil
 }
 
-func (m *Module) push() error {
+func (m *Modules) push() error {
 	m.Printer.Println("Checking which modules need pushing...")
 	paths := getModulePaths()
 
@@ -158,7 +158,7 @@ func (m *Module) push() error {
 	return nil
 }
 
-func (m *Module) pull() error {
+func (m *Modules) pull() error {
 	m.Printer.Println("Checking which modules need pulling...")
 
 	paths := getModulePaths()
@@ -197,7 +197,7 @@ func (m *Module) pull() error {
 	return nil
 }
 
-func (m *Module) status() error {
+func (m *Modules) status() error {
 	pathsReceived := getModulePaths()
 
 	var wg sync.WaitGroup
