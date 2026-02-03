@@ -79,7 +79,6 @@ func (m *Modules) Run(printer *printer.Printer) error {
 // There's not real need to check if the repo is dirty. The failure is quick and
 // has no side effects.
 func (m *Modules) prime() error {
-	m.Printer.Println("Checking which modules have uncommitted changes...")
 	message := &cfg.BatchCommitMessage
 
 	paths := getModulePaths()
@@ -101,7 +100,7 @@ func (m *Modules) prime() error {
 			report := git.Status(repo)
 			// clean repo returns an empty string
 			if report != "" {
-				m.Printer.Println("\t- Priming", repo)
+				m.Printer.Println("-> Priming", repo)
 				git.AddAll(repo)
 				git.Commit(repo, message)
 			}
@@ -118,7 +117,6 @@ func (m *Modules) prime() error {
 }
 
 func (m *Modules) push() error {
-	m.Printer.Println("Checking which modules need pushing...")
 	paths := getModulePaths()
 
 	var wg sync.WaitGroup
@@ -142,7 +140,7 @@ func (m *Modules) push() error {
 			}
 
 			if wantsPush {
-				m.Printer.Println("\t- Pushing", repo)
+				m.Printer.Println("-> Pushing", repo)
 				git.Push(repo)
 			}
 		}(p)
@@ -159,8 +157,6 @@ func (m *Modules) push() error {
 }
 
 func (m *Modules) pull() error {
-	m.Printer.Println("Checking which modules need pulling...")
-
 	paths := getModulePaths()
 
 	var wg sync.WaitGroup
@@ -181,7 +177,7 @@ func (m *Modules) pull() error {
 				return
 			}
 			if wantsPull {
-				m.Printer.Println("\t- Pulling:", repo)
+				m.Printer.Println("-> Pulling:", repo)
 				git.Pull(repo)
 			}
 

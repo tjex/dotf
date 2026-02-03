@@ -48,6 +48,7 @@ func (s *Sync) sync() error {
 }
 
 func (s *Sync) syncBare() error {
+	s.Printer.Println("Syncing bare repository...")
 	bare := dotf.Bare{Printer: s.Printer}
 	err := bare.Sync(s.Printer)
 	if err != nil {
@@ -58,10 +59,11 @@ func (s *Sync) syncBare() error {
 }
 
 func (s *Sync) syncModules() error {
+	s.Printer.Println("Syncing modules...")
 	pull := &dotf.ModuleCmd{Pull: true}
 	prime := &dotf.ModuleCmd{Prime: true}
 	push := &dotf.ModuleCmd{Push: true}
-	module := &dotf.Module{Printer: s.Printer}
+	module := &dotf.Modules{Printer: s.Printer}
 
 	module.Cmd = pull
 	err := module.Run(s.Printer)

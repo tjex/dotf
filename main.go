@@ -54,7 +54,7 @@ func main() {
 			printer.Println(fmt.Sprintf("Error: %v", err))
 		}
 	case args.ModuleCmd != nil:
-		m := &dotf.Module{Printer: printer, Cmd: args.ModuleCmd}
+		m := &dotf.Modules{Printer: printer, Cmd: args.ModuleCmd}
 
 		if err := m.Run(printer); err != nil {
 			printer.Println(fmt.Sprintf("Error: %v", err))

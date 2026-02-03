@@ -12,7 +12,6 @@ type Bare struct {
 
 func (b *Bare) Sync(printer *printer.Printer) error {
 	b.Printer = printer
-	b.Printer.Println("Syncing bare repository...")
 
 	bareRepo, err := util.ExpandPath(cfg.GitDir)
 	if err != nil {
@@ -37,8 +36,6 @@ func (b *Bare) Sync(printer *printer.Printer) error {
 		printer.Println(out)
 	}
 
-	b.Printer.Println("Priming bare repository...")
-
 	var out string
 	out, err = git.Dotf([]string{"add", "-u"}) // add doesnt have a --quiet flag
 	if err != nil {
@@ -51,7 +48,7 @@ func (b *Bare) Sync(printer *printer.Printer) error {
 	}
 
 	if dirty {
-		b.Printer.Println("Committing changes...")
+		b.Printer.Println("-> Committing changes.")
 		message := &cfg.BatchCommitMessage
 		out, err := git.Dotf([]string{"commit", "-m", *message})
 		if err != nil {
@@ -65,7 +62,7 @@ func (b *Bare) Sync(printer *printer.Printer) error {
 		return err
 	}
 	if wantsPush {
-		b.Printer.Println("Pushing bare repository...")
+		b.Printer.Println("-> Pushing.")
 		out, err = git.Dotf([]string{"push"})
 		if err != nil {
 			return err
