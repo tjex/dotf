@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// A regular exec.Command but stdout and stderr merged and returned as strings.
+// A regular exec.Command but errors from git errors require custom handling.
 func Cmd(prog string, args []string) (string, error) {
 	var outStd bytes.Buffer
 	var outErr bytes.Buffer
@@ -19,8 +19,12 @@ func Cmd(prog string, args []string) (string, error) {
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = &outErr
 	cmd.Run()
-	if len(outErr.Bytes()) > 0 {
-		return "", errors.New(outErr.String())
+	// Git prints normal info to stderr, so check if command is of type
+	// [ExitError] to verify it was an actual error.
+	if exitError, ok := cmd.ProcessState.Sys().(interface{ ExitStatus() int }); ok {
+		if exitError.ExitStatus() != 0 {
+			return "", errors.New(outErr.String())
+		}
 	}
 
 	return outStd.String(), nil

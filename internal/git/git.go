@@ -51,24 +51,20 @@ func Push(repo string) (string, error) {
 	return gitRepoCmd(repo, "push")
 }
 
-func Pull(repo string) string {
-	out, _ := gitRepoCmd(repo, "pull")
-	return out
+func Pull(repo string) (string, error) {
+	return gitRepoCmd(repo, "pull")
 }
 
-func Commit(repo string, message *string) string {
-	out, _ := gitRepoCmd(repo, "commit", "-m", *message)
-	return out
+func Commit(repo string, message *string) (string, error) {
+	return gitRepoCmd(repo, "commit", "-m", *message)
 }
 
-func AddAll(repo string) string {
-	out, _ := gitRepoCmd(repo, "add", "-A")
-	return out
+func AddAll(repo string) (string, error) {
+	return gitRepoCmd(repo, "add", "-A")
 }
 
-func Status(repo string) string {
-	out, _ := gitRepoCmd(repo, "-c", "color.ui=always", "status", "-s")
-	return out
+func Status(repo string) (string, error) {
+	return gitRepoCmd(repo, "-c", "color.ui=always", "status", "-s")
 }
 
 // Build the arguments array for dotf git call

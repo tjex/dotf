@@ -97,7 +97,12 @@ func (m *Modules) prime() error {
 				return
 			}
 
-			report := git.Status(repo)
+			report, err := git.Status(repo)
+			if err != nil {
+				errCh <- errorFmt(repo, err)
+				return
+			}
+
 			// clean repo returns an empty string
 			if report != "" {
 				m.Printer.Println("-> Priming", repo)
@@ -141,7 +146,11 @@ func (m *Modules) push() error {
 
 			if wantsPush {
 				m.Printer.Println("-> Pushing", repo)
-				git.Push(repo)
+				_, err := git.Push(repo)
+				if err != nil {
+					errCh <- errorFmt(repo, err)
+					return
+				}
 			}
 		}(p)
 	}
@@ -178,7 +187,11 @@ func (m *Modules) pull() error {
 			}
 			if wantsPull {
 				m.Printer.Println("-> Pulling:", repo)
-				git.Pull(repo)
+				_, err := git.Pull(repo)
+				if err != nil {
+					errCh <- errorFmt(repo, err)
+					return
+				}
 			}
 
 		}(p)
@@ -211,7 +224,12 @@ func (m *Modules) status() error {
 				return
 			}
 
-			report := git.Status(repo)
+			report, err := git.Status(repo)
+			if err != nil {
+				errCh <- errorFmt(repo, err)
+				return
+			}
+
 			if report != "" {
 				m.Printer.Println("Changes in", repo+":")
 				m.Printer.Println(report)
