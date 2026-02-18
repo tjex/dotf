@@ -1,14 +1,16 @@
 package sync
 
 import (
+	"errors"
+
 	"git.sr.ht/~tjex/dotf/cmd/dotf"
 	"git.sr.ht/~tjex/dotf/internal/printer"
 )
 
 type SyncCmd struct {
-	Sync        bool `arg:"" help:"sync remote and local with latest changes (i.e, pull all -> push all)."` // default command
-	SyncBare    bool `arg:"-b,--bare" default:"false" help:"sync only the bare repository, excluding modules."`
-	SyncModules bool `arg:"-m,--modules" default:"false" help:"sync only modules."`
+	SyncAll     bool `arg:"-a,--all" help:"Sync both the bare repository and all modules."`
+	SyncBare    bool `arg:"-b,--bare" help:"Sync the bare repository."`
+	SyncModules bool `arg:"-m,--modules" help:"Sync all modules."`
 }
 
 type Sync struct {
@@ -22,18 +24,20 @@ func (s *Sync) Run(printer *printer.Printer) error {
 	var err error
 
 	switch {
+	case s.Cmd.SyncAll:
+		err = s.syncAll()
 	case s.Cmd.SyncBare:
 		err = s.syncBare()
 	case s.Cmd.SyncModules:
 		err = s.syncModules()
 	default:
-		err = s.sync()
+		return errors.New("No flag passed to sync.")
 	}
 
 	return err
 }
 
-func (s *Sync) sync() error {
+func (s *Sync) syncAll() error {
 	err := s.syncBare()
 	if err != nil {
 		return err
