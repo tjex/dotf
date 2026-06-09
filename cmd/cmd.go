@@ -10,7 +10,8 @@ import (
 	"strings"
 )
 
-// A regular exec.Command but errors from git errors require custom handling.
+// A regular exec.Command but with custom error handling.
+// Returns: (stdout string, err error)
 func Cmd(prog string, args []string) (string, error) {
 	var outStd bytes.Buffer
 	var outErr bytes.Buffer

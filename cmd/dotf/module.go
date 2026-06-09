@@ -106,8 +106,14 @@ func (m *Modules) prime() error {
 			// clean repo returns an empty string
 			if report != "" {
 				m.Printer.Println("-> Priming", repo)
-				git.AddAll(repo)
-				git.Commit(repo, message)
+				if _, err := git.AddAll(repo); err != nil {
+					errCh <- errorFmt(repo, err)
+					return
+				}
+				if _, err = git.Commit(repo, message); err != nil {
+					errCh <- errorFmt(repo, err)
+					return
+				}
 			}
 		}(p)
 	}
