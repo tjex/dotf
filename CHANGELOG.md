@@ -1,5 +1,11 @@
 # dotf Changelog
 
+## v0.4.5
+
+- Add missing error handling to modules.prime()
+
+## <missing... Sorry>
+
 ## v0.2.0
 
 - Remove mirroring functionality completely.
