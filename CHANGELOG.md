@@ -1,5 +1,15 @@
 # dotf Changelog
 
+## v0.5.0
+
+- Add config options to control concurrent module operations (batching and
+  delaying)
+
+## v0.4.6
+
+- Better handling of git commands, so that interactive git operations do not
+  hang.
+
 ## v0.4.5
 
 - Add missing error handling to modules.prime()

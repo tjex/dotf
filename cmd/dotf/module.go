@@ -16,8 +16,7 @@ import (
 )
 
 var (
-	cfg   = config.UserConfig()
-	sleep = 100 * time.Millisecond
+	cfg = config.UserConfig()
 )
 
 type ModuleCmd struct {
@@ -27,7 +26,6 @@ type ModuleCmd struct {
 	Pull   bool `arg:"--pull" default:"false" help:"pulls all modules from their remotes."`
 	List   bool `arg:"-l,--list" default:"false" help:"list all tracked modules"`
 	Edit   bool `arg:"-e, --edit" default:"false" help:"cd into selected module via fzf"`
-	Limit  bool `arg:"--limit" default:"false" help:"add a 100ms delay between git processes to avoid exceeding your git host's rate limits."`
 }
 
 type Modules struct {
@@ -139,7 +137,7 @@ func (m *Modules) push() error {
 	errCh := make(chan error, len(paths)) // buffered to avoid goroutine blocking
 
 	wg.Add(len(paths))
-	for _, p := range paths {
+	for i, p := range paths {
 		go func(p string) {
 			defer wg.Done()
 
@@ -164,7 +162,8 @@ func (m *Modules) push() error {
 				}
 			}
 		}(p)
-		if m.Cmd.Limit {
+		sleep := time.Duration(cfg.Concurrency.SleepDuration) * time.Millisecond
+		if i%10 == 0 {
 			time.Sleep(sleep)
 		}
 	}
@@ -181,12 +180,13 @@ func (m *Modules) push() error {
 
 func (m *Modules) pull() error {
 	paths := getModulePaths()
+	batchSize := cfg.Concurrency.BatchSize
 
 	var wg sync.WaitGroup
 	errCh := make(chan error, len(paths))
 	wg.Add(len(paths))
 
-	for _, p := range paths {
+	for i, p := range paths {
 		// Sleep for 0.5 seconds before starting the next pull to avoid overwhelming the system with too many concurrent git processes.
 		go func(p string) {
 			defer wg.Done()
@@ -209,7 +209,8 @@ func (m *Modules) pull() error {
 				}
 			}
 		}(p)
-		if m.Cmd.Limit {
+		sleep := time.Duration(cfg.Concurrency.SleepDuration) * time.Millisecond
+		if i%batchSize == 0 {
 			time.Sleep(sleep)
 		}
 	}

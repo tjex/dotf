@@ -20,9 +20,13 @@ type Config struct {
 	Worktree           string
 	GitDir             string `toml:"git-dir"`
 	Origin             string
-	RepoFlags          []string                // Flags for bare repo dir and worktree
-	BatchCommitMessage string                  `toml:"batch-commit-message"`
-	Modules            map[string]ModuleConfig `toml:"modules"`
+	RepoFlags          []string // Flags for bare repo dir and worktree
+	BatchCommitMessage string   `toml:"batch-commit-message"`
+	Concurrency        struct {
+		BatchSize     int `toml:"batch-size"`
+		SleepDuration int `toml:"sleep-duration"`
+	}
+	Modules map[string]ModuleConfig `toml:"modules"`
 }
 
 type ModuleConfig struct {
@@ -85,4 +89,3 @@ func BareRepoConfig() string {
 	gitConf := filepath.Join(cfg.GitDir, "config")
 	return gitConf
 }
-
