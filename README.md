@@ -31,9 +31,9 @@ paths = ["~/path/to/repo1", "~/path/to/repo2"]
 ## Installation
 
 1. Clone this repo
-   1. To install with the latest changes: `go install`
+   1. To install with the latest changes: `make install`
    2. To install with a stable version:
-      `git checkout tags/<version> && go install`
+      `git checkout tags/<version> && make install`
 
 To get version tags, first fetch all tags with `git fetch --all --tags` and then
 run `git tag`.
