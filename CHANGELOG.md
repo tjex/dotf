@@ -1,5 +1,9 @@
 # dotf Changelog
 
+## v0.5.2
+
+- Fixed module operations hanging if concurrency was unset in config or set to <= 0
+
 ## v0.5.1
 
 - Improve concurrency batch handling.
