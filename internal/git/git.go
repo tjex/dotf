@@ -2,33 +2,46 @@ package git
 
 import (
 	"fmt"
+	"os/exec"
 
 	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/internal/config"
 )
 
 // Base helper to run a git command with -C <repo> automatically
-func gitRepoCmd(repo string, args ...string) (string, error) {
+func RepoCmd(repo string, args ...string) *exec.Cmd {
 	fullArgs := append([]string{"-C", repo}, args...)
 	return cmd.Cmd("git", fullArgs)
 }
 
+func RepoCmdRoutine(repo string, args ...string) (string, error) {
+	fullArgs := append([]string{"-C", repo}, args...)
+	return cmd.CmdRoutine("git", fullArgs)
+}
+
 // Full error-returning helper
-func Cmd(args []string) (string, error) {
+func Cmd(args []string) *exec.Cmd {
 	return cmd.Cmd("git", args)
 }
 
 // Git command with flags set as per the user's config
-func Dotf(args []string) (string, error) {
+func Dotf(args []string) *exec.Cmd {
+	bareRepoArgs := buildArgsArray(args)
+	return cmd.Cmd("git", bareRepoArgs)
+}
+
+// Git command with flags set as per the user's config
+func DotfInstance(args []string) *exec.Cmd {
 	bareRepoArgs := buildArgsArray(args)
 	return cmd.Cmd("git", bareRepoArgs)
 }
 
 // Returns whether local branch wants a pull/push
 func SyncState(repo string) (bool, bool, error) {
-	_, _ = gitRepoCmd(repo, "fetch", "--quiet")
+	cmd := RepoCmd(repo, "fetch", "--quiet")
+	cmd.Run()
 
-	out, err := gitRepoCmd(repo, "rev-list", "--left-right", "--count", "@{upstream}...HEAD")
+	out, err := RepoCmdRoutine(repo, "rev-list", "--left-right", "--count", "@{upstream}...HEAD")
 	if err != nil {
 		return false, false, err
 	}
@@ -40,7 +53,7 @@ func SyncState(repo string) (bool, bool, error) {
 }
 
 func UncommittedChanges(repo, worktree string) (bool, error) {
-	out, err := cmd.Cmd("git", []string{"-C", repo, "--work-tree", worktree, "status", "--porcelain"})
+	out, err := cmd.CmdRoutine("git", []string{"-C", repo, "--work-tree", worktree, "status", "--porcelain"})
 	if err != nil {
 		return false, err
 	}
@@ -48,23 +61,23 @@ func UncommittedChanges(repo, worktree string) (bool, error) {
 }
 
 func Push(repo string) (string, error) {
-	return gitRepoCmd(repo, "push")
+	return RepoCmdRoutine(repo, "push")
 }
 
 func Pull(repo string) (string, error) {
-	return gitRepoCmd(repo, "pull")
+	return RepoCmdRoutine(repo, "pull")
 }
 
-func Commit(repo string, message *string) (string, error) {
-	return gitRepoCmd(repo, "commit", "-m", *message)
+func Commit(repo string, message string) (string, error) {
+	return RepoCmdRoutine(repo, "commit", "-m", message)
 }
 
 func AddAll(repo string) (string, error) {
-	return gitRepoCmd(repo, "add", "-A")
+	return RepoCmdRoutine(repo, "add", "-A")
 }
 
 func Status(repo string) (string, error) {
-	return gitRepoCmd(repo, "-c", "color.ui=always", "status", "-s")
+	return RepoCmdRoutine(repo, "-c", "color.ui=always", "status", "-s")
 }
 
 // Build the arguments array for dotf git call

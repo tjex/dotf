@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/internal/config"
@@ -14,7 +15,10 @@ import (
 	"git.sr.ht/~tjex/dotf/internal/util"
 )
 
-var cfg = config.UserConfig()
+var (
+	cfg   = config.UserConfig()
+	sleep = 100 * time.Millisecond
+)
 
 type ModuleCmd struct {
 	Status bool `arg:"--status" default:"false" help:"show 'git status -s' for all modules"`
@@ -23,6 +27,7 @@ type ModuleCmd struct {
 	Pull   bool `arg:"--pull" default:"false" help:"pulls all modules from their remotes."`
 	List   bool `arg:"-l,--list" default:"false" help:"list all tracked modules"`
 	Edit   bool `arg:"-e, --edit" default:"false" help:"cd into selected module via fzf"`
+	Limit  bool `arg:"--limit" default:"false" help:"add a 100ms delay between git processes to avoid exceeding your git host's rate limits."`
 }
 
 type Modules struct {
@@ -110,7 +115,7 @@ func (m *Modules) prime() error {
 					errCh <- errorFmt(repo, err)
 					return
 				}
-				if _, err = git.Commit(repo, message); err != nil {
+				if _, err = git.Commit(repo, *message); err != nil {
 					errCh <- errorFmt(repo, err)
 					return
 				}
@@ -159,6 +164,9 @@ func (m *Modules) push() error {
 				}
 			}
 		}(p)
+		if m.Cmd.Limit {
+			time.Sleep(sleep)
+		}
 	}
 
 	wg.Wait()
@@ -179,6 +187,7 @@ func (m *Modules) pull() error {
 	wg.Add(len(paths))
 
 	for _, p := range paths {
+		// Sleep for 0.5 seconds before starting the next pull to avoid overwhelming the system with too many concurrent git processes.
 		go func(p string) {
 			defer wg.Done()
 			repo, err := util.ExpandPath(p)
@@ -199,8 +208,10 @@ func (m *Modules) pull() error {
 					return
 				}
 			}
-
 		}(p)
+		if m.Cmd.Limit {
+			time.Sleep(sleep)
+		}
 	}
 	wg.Wait()
 	close(errCh)

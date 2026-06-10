@@ -10,9 +10,19 @@ import (
 	"strings"
 )
 
-// A regular exec.Command but with custom error handling.
+// Return an instance of cmd for the calling function to call .Run()
+func Cmd(prog string, args []string) *exec.Cmd {
+	cmd := exec.Command(prog, args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd
+}
+	
+
+// A regular exec.Command but that returns stdout as string.
 // Returns: (stdout string, err error)
-func Cmd(prog string, args []string) (string, error) {
+func CmdRoutine(prog string, args []string) (string, error) {
 	var outStd bytes.Buffer
 	var outErr bytes.Buffer
 	cmd := exec.Command(prog, args...)

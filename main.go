@@ -62,21 +62,12 @@ func main() {
 	case err == arg.ErrHelp: // Means user passed: --help or -h
 		p.WriteHelp(os.Stdout)
 	case err == arg.ErrVersion: // Means user passed: --version or -v
+		// FIXME: Not working. Passing --version just fals to default case.
 		v, _ := strings.CutPrefix(Version, "v")
 		fmt.Println("dotf version", v)
-		out, err := git.Dotf(stdinArgs) // prints git version
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
-		printer.Println(out)
 	default:
-		out, err := git.Dotf(stdinArgs)
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
-		printer.Println(out)
+		cmd := git.DotfInstance(stdinArgs)
+		cmd.Run()
 	}
 
 }
