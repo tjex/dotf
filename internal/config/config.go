@@ -68,7 +68,16 @@ func ReadUserConfig() error {
 	var flags []string
 	flags = append(flags, "--git-dir", gitDir, "--work-tree", worktree)
 	cfg.RepoFlags = flags
+
+	setConfigDefaults(&cfg)
 	return nil
+}
+
+func setConfigDefaults(cfg *Config) {
+	// A batch size of 0 will cause concurrency operations to hang.
+	if cfg.Concurrency.BatchSize <= 0 {
+		cfg.Concurrency.BatchSize = 1000
+	}
 }
 
 func configDir() string {

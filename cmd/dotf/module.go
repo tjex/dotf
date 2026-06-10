@@ -201,7 +201,6 @@ func (m *Modules) pull() error {
 				errCh <- errorFmt(repo, err)
 				return
 			}
-			m.Printer.Println("Checking", repo)
 			wantsPull, _, err := git.SyncState(repo)
 			if err != nil {
 				errCh <- errorFmt(repo, err)
