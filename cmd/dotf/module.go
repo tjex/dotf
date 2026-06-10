@@ -68,7 +68,7 @@ func (m *Modules) Run(printer *printer.Printer) error {
 	case m.Cmd.Pull:
 		err = m.pull()
 	case m.Cmd.List:
-		list()
+		err = list()
 	case m.Cmd.Edit:
 		edit()
 	default:
@@ -269,7 +269,7 @@ func (m *Modules) status() error {
 }
 
 // Return paths to all submodules
-func list() {
+func list() error {
 	pathsReceived := getModulePaths()
 	var paths []string
 	for _, path := range pathsReceived {
@@ -277,8 +277,13 @@ func list() {
 	}
 	sort.Strings(paths)
 	for _, path := range paths {
-		fmt.Println(path)
+		absPath, err := util.ExpandPath(path)
+		if err != nil {
+			return err
+		}
+		fmt.Println(absPath)
 	}
+	return nil
 
 }
 
