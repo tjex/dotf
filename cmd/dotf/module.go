@@ -6,7 +6,6 @@ import (
 	"sort"
 	"strings"
 	"sync"
-	"time"
 
 	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/internal/config"
@@ -83,13 +82,13 @@ func (m *Modules) Run(printer *printer.Printer) error {
 // has no side effects.
 func (m *Modules) prime() error {
 	message := &cfg.BatchCommitMessage
-
 	paths := getModulePaths()
 
-	var wg sync.WaitGroup
 	errCh := make(chan error, len(paths))
-	wg.Add(len(paths))
 
+	var wg sync.WaitGroup
+
+	wg.Add(len(paths))
 	for _, p := range paths {
 		go func(p string) {
 			defer wg.Done()
@@ -130,16 +129,23 @@ func (m *Modules) prime() error {
 	return nil
 }
 
+// Push modules to their remotes in parallel.
 func (m *Modules) push() error {
 	paths := getModulePaths()
+	batchSize := cfg.Concurrency.BatchSize
+
+	errCh := make(chan error, len(paths)) // buffered to avoid goroutine blocking
+	sem := make(chan struct{}, batchSize)
 
 	var wg sync.WaitGroup
-	errCh := make(chan error, len(paths)) // buffered to avoid goroutine blocking
 
-	wg.Add(len(paths))
-	for i, p := range paths {
+	for _, p := range paths {
+		wg.Add(1)
+		sem <- struct{}{}
+
 		go func(p string) {
 			defer wg.Done()
+			defer func() { <-sem }()
 
 			repo, err := util.ExpandPath(p)
 			if err != nil {
@@ -162,10 +168,6 @@ func (m *Modules) push() error {
 				}
 			}
 		}(p)
-		sleep := time.Duration(cfg.Concurrency.SleepDuration) * time.Millisecond
-		if i%10 == 0 {
-			time.Sleep(sleep)
-		}
 	}
 
 	wg.Wait()
@@ -178,23 +180,28 @@ func (m *Modules) push() error {
 	return nil
 }
 
+// Pull modules from their remotes in parallel.
 func (m *Modules) pull() error {
 	paths := getModulePaths()
 	batchSize := cfg.Concurrency.BatchSize
 
-	var wg sync.WaitGroup
 	errCh := make(chan error, len(paths))
-	wg.Add(len(paths))
+	sem := make(chan struct{}, batchSize)
 
-	for i, p := range paths {
-		// Sleep for 0.5 seconds before starting the next pull to avoid overwhelming the system with too many concurrent git processes.
+	var wg sync.WaitGroup
+
+	for _, p := range paths {
+		wg.Add(1)
+		sem <- struct{}{}
 		go func(p string) {
 			defer wg.Done()
+			defer func() { <-sem }()
 			repo, err := util.ExpandPath(p)
 			if err != nil {
 				errCh <- errorFmt(repo, err)
 				return
 			}
+			m.Printer.Println("Checking", repo)
 			wantsPull, _, err := git.SyncState(repo)
 			if err != nil {
 				errCh <- errorFmt(repo, err)
@@ -209,10 +216,6 @@ func (m *Modules) pull() error {
 				}
 			}
 		}(p)
-		sleep := time.Duration(cfg.Concurrency.SleepDuration) * time.Millisecond
-		if i%batchSize == 0 {
-			time.Sleep(sleep)
-		}
 	}
 	wg.Wait()
 	close(errCh)

@@ -1,5 +1,10 @@
 # dotf Changelog
 
+## v0.5.1
+
+- Improve concurrency batch handling.
+- Removed concurrency sleep duration, as new worker group handling suffices.
+
 ## v0.5.0
 
 - Add config options to control concurrent module operations (batching and

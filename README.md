@@ -21,15 +21,12 @@ origin = "<read+write url for origin>" # eg, git@yourhost.com:user/dotfiles.
 batch-commit-message = "batch dotf update" # used by `dotf m --prime` for module commit message.
 
 [concurrency]
-batch-size = 10 # How many concurrent git operations to run before sleeping.
-sleep-duration = 150 # Duration in ms to sleep until executing next batch of git operations.
+batch-size = 15 # How many concurrent git operations to run per batch. 
+                # This helps if your git host rate limits or otherwise restricts your connections.
 
 [modules.default]
 paths = ["~/path/to/repo1", "~/path/to/repo2"]
 ```
-
-For example, my config
-[is here](https://git.sr.ht/~tjex/dotfiles/tree/mac/item/.config/dotf/config.toml).
 
 ## Installation
 

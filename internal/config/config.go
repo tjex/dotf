@@ -24,7 +24,6 @@ type Config struct {
 	BatchCommitMessage string   `toml:"batch-commit-message"`
 	Concurrency        struct {
 		BatchSize     int `toml:"batch-size"`
-		SleepDuration int `toml:"sleep-duration"`
 	}
 	Modules map[string]ModuleConfig `toml:"modules"`
 }
