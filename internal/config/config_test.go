@@ -9,14 +9,14 @@ import (
 )
 
 func TestModuleAcceptsStringAndTable(t *testing.T) {
-	src := `paths = ["~/a", { path = "~/b", repository = "bb" }, { path = "~/c" }]`
+	src := `paths = ["~/a", { path = "~/b", repo = "bb" }, { path = "~/c" }]`
 	var mc config.ModuleConfig
 	dec := toml.NewDecoder(bytes.NewReader([]byte(src)))
 	dec.EnableUnmarshalerInterface()
 	if err := dec.Decode(&mc); err != nil {
 		t.Fatal(err)
 	}
-	want := []config.Module{{Path: "~/a"}, {Path: "~/b", Repository: "bb"}, {Path: "~/c"}}
+	want := []config.Module{{Path: "~/a"}, {Path: "~/b", Repo: "bb"}, {Path: "~/c"}}
 	if len(mc.Paths) != len(want) {
 		t.Fatalf("got %v", mc.Paths)
 	}

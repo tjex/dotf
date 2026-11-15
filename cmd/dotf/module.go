@@ -331,7 +331,7 @@ func (m *Modules) Clone() error {
 			if _, err := os.Stat(repo); err == nil {
 				return // already present
 			}
-			remote, err := git.ModuleRemote(cfg.Origin, cfg.RepoSuffix, repo, mod.Repository)
+			remote, err := git.ModuleRemote(cfg.Origin, cfg.RepoSuffix, repo, mod.Repo)
 			if err != nil {
 				errCh <- errorFmt(repo, err)
 				return

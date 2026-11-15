@@ -41,7 +41,7 @@ type ModuleConfig struct {
 // is the directory's last element plus the configured repo-suffix.
 type Module struct {
 	Path       string `toml:"path"`
-	Repository string `toml:"repository"`
+	Repo string `toml:"repo"`
 }
 
 // UnmarshalTOML accepts either a plain string (the path) or an inline table
@@ -63,8 +63,8 @@ func (m *Module) UnmarshalTOML(node *unstable.Node) error {
 			switch string(key.Node().Data) {
 			case "path":
 				m.Path = value
-			case "repository":
-				m.Repository = value
+			case "repo":
+				m.Repo = value
 			}
 		}
 		if m.Path == "" {
