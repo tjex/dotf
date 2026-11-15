@@ -1,6 +1,8 @@
 package config
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -8,6 +10,7 @@ import (
 
 	"git.sr.ht/~tjex/dotf/internal/util"
 	toml "github.com/pelletier/go-toml/v2"
+	"github.com/pelletier/go-toml/v2/unstable"
 )
 
 var (
@@ -20,17 +23,57 @@ type Config struct {
 	Worktree           string
 	GitDir             string `toml:"git-dir"`
 	Origin             string
-	RepoSuffix         string `toml:"repo-suffix"`
+	RepoSuffix         string   `toml:"repo-suffix"`
 	RepoFlags          []string // Flags for bare repo dir and worktree
 	BatchCommitMessage string   `toml:"batch-commit-message"`
 	Concurrency        struct {
-		BatchSize     int `toml:"batch-size"`
+		BatchSize int `toml:"batch-size"`
 	}
 	Modules map[string]ModuleConfig `toml:"modules"`
 }
 
 type ModuleConfig struct {
-	Paths []string `toml:"paths"`
+	Paths []Module `toml:"paths"`
+}
+
+// Module is a tracked directory and, optionally, its remote repository name.
+// Repository is used verbatim (suffix is not appended). When empty, the name
+// is the directory's last element plus the configured repo-suffix.
+type Module struct {
+	Path       string `toml:"path"`
+	Repository string `toml:"repository"`
+}
+
+// UnmarshalTOML accepts either a plain string (the path) or an inline table
+// with path and optional repository keys.
+func (m *Module) UnmarshalTOML(node *unstable.Node) error {
+	switch node.Kind {
+	case unstable.String:
+		m.Path = string(node.Data)
+		return nil
+	case unstable.InlineTable:
+		it := node.Children()
+		for it.Next() {
+			kv := it.Node()
+			key := kv.Key()
+			if !key.Next() {
+				continue
+			}
+			value := string(kv.Value().Data)
+			switch string(key.Node().Data) {
+			case "path":
+				m.Path = value
+			case "repository":
+				m.Repository = value
+			}
+		}
+		if m.Path == "" {
+			return errors.New("module entry has no path")
+		}
+		return nil
+	default:
+		return errors.New("module entry must be a string or an inline table")
+	}
 }
 
 // returns pointer to user config struct
@@ -51,7 +94,9 @@ func ReadUserConfig() error {
 		logger.Print(err)
 	}
 
-	err = toml.Unmarshal(file, &cfg)
+	dec := toml.NewDecoder(bytes.NewReader(file))
+	dec.EnableUnmarshalerInterface()
+	err = dec.Decode(&cfg)
 	if err != nil {
 		logger.Print(err)
 	}

@@ -39,21 +39,26 @@ func errorFmt(repoPath string, err error) error {
 	return errors.New(e)
 }
 
-func getModulePaths() []string {
-	var paths []string
+func getModules() []config.Module {
+	var modules []config.Module
 	env := util.ResolveEnvironment(cfg.Env)
 
-	modules := &cfg.Modules
-	for name, m := range *modules {
+	for name, m := range cfg.Modules {
 		// modules.default are always included
 		if name != env && name != "default" {
 			continue
 		}
-		for _, p := range m.Paths {
-			paths = append(paths, p)
-		}
+		modules = append(modules, m.Paths...)
 	}
 
+	return modules
+}
+
+func getModulePaths() []string {
+	var paths []string
+	for _, m := range getModules() {
+		paths = append(paths, m.Path)
+	}
 	return paths
 }
 
@@ -308,17 +313,17 @@ func (m *Modules) Edit() error {
 }
 
 func (m *Modules) Clone() error {
-	paths := getModulePaths()
+	modules := getModules()
 
 	var wg sync.WaitGroup
-	errCh := make(chan error, len(paths)) // buffered to avoid goroutine blocking
+	errCh := make(chan error, len(modules)) // buffered to avoid goroutine blocking
 
-	for _, p := range paths {
+	for _, mod := range modules {
 		wg.Add(1)
 
-		go func(p string) {
+		go func(mod config.Module) {
 			defer wg.Done()
-			repo, err := util.ExpandPath(p)
+			repo, err := util.ExpandPath(mod.Path)
 			if err != nil {
 				errCh <- errorFmt(repo, err)
 				return
@@ -326,7 +331,7 @@ func (m *Modules) Clone() error {
 			if _, err := os.Stat(repo); err == nil {
 				return // already present
 			}
-			remote, err := git.ModuleRemote(cfg.Origin, cfg.RepoSuffix, repo)
+			remote, err := git.ModuleRemote(cfg.Origin, cfg.RepoSuffix, repo, mod.Repository)
 			if err != nil {
 				errCh <- errorFmt(repo, err)
 				return
@@ -337,7 +342,7 @@ func (m *Modules) Clone() error {
 				errCh <- errorFmt(repo, err)
 				return
 			}
-		}(p)
+		}(mod)
 
 	}
 
