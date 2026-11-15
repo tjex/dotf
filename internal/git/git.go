@@ -55,6 +55,17 @@ func UncommittedChanges(repo, worktree string) (bool, error) {
 	return len(out) > 0, nil
 }
 
+// IsFullURL reports whether s is a complete git remote URL (git@host:..., git://,
+// ssh:// or http(s)://) that must be used as-is.
+func IsFullURL(s string) bool {
+	for _, p := range []string{"git@", "git://", "ssh://", "https://", "http://"} {
+		if strings.HasPrefix(s, p) {
+			return true
+		}
+	}
+	return false
+}
+
 // Clone clones url into dest. Missing parent directories are created by git.
 func Clone(url, dest string) (string, error) {
 	return proc.Output("git", []string{"clone", url, dest})
@@ -62,10 +73,14 @@ func Clone(url, dest string) (string, error) {
 
 // ModuleRemote derives a module's remote URL from the bare repo's origin.
 // The origin's last path segment (the bare repo name) is replaced by the
-// repository name. If repository is empty, the name is the module directory
+// repository name. A repository that is a full URL is returned unchanged.
+// If repository is empty, the name is the module directory
 // name plus suffix, e.g.
 // ("git@git.sr.ht:~me/dotfiles", "-rc", "~/.config/nvim", "") -> "git@git.sr.ht:~me/nvim-rc".
 func ModuleRemote(origin, suffix, modulePath, repository string) (string, error) {
+	if IsFullURL(repository) {
+		return repository, nil
+	}
 	origin = strings.TrimRight(origin, "/")
 	i := strings.LastIndexAny(origin, "/:")
 	if i < 0 {

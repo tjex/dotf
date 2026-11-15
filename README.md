@@ -105,12 +105,16 @@ paths = [
   { path = "~/.config/tmux" },                                        # -> git@git.sr.ht:~me/tmux-rc
   { path = "~/.config/task", repository = "task-config-rc" },         # -> git@git.sr.ht:~me/task-config-rc
   { path = "~/.local/share/task", repository = "task-data-rc" },      # -> git@git.sr.ht:~me/task-data-rc
+  { path = "~/.config/foo", repository = "https://github.com/me/foo.git" }, # -> used as-is
 ]
 ```
 
 - Without `repository`, the name is the path's last element plus `repo-suffix`.
 - With `repository`, the name is used exactly as written. `repo-suffix` is _not_
   appended.
+- If `repository` starts with `git@`, `git://`, `ssh://`, `https://` or
+  `http://`, it is treated as a complete remote URL and cloned from as-is.
+  `origin` is ignored for that module, so it can live on any host.
 - Set `repository` whenever two modules share a last path element (like the two
   `task` directories above), otherwise they would map to the same remote.
 - Modules are expected to be hosted next to the bare repository, as `origin`

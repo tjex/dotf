@@ -13,6 +13,8 @@ func TestModuleRemote(t *testing.T) {
 		{"https://git.sr.ht/~tjex/dotfiles/", "", "~/notes", "", "https://git.sr.ht/~tjex/notes"},
 		{"git@host:dotfiles", "-rc", "~/notes", "", "git@host:notes-rc"},
 		{"git@git.sr.ht:~tjex/dotfiles", "-rc", "~/.local/share/task", "task-data-rc", "git@git.sr.ht:~tjex/task-data-rc"},
+		{"git@git.sr.ht:~tjex/dotfiles", "-rc", "~/x", "https://github.com/me/x.git", "https://github.com/me/x.git"},
+		{"git@git.sr.ht:~tjex/dotfiles", "-rc", "~/x", "git@github.com:me/x.git", "git@github.com:me/x.git"},
 	}
 	for _, tt := range tests {
 		got, err := git.ModuleRemote(tt.origin, tt.suffix, tt.path, tt.repo)
