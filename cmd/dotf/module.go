@@ -3,6 +3,7 @@ package dotf
 import (
 	"errors"
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -322,8 +323,16 @@ func (m *Modules) Clone() error {
 				errCh <- errorFmt(repo, err)
 				return
 			}
-			m.Printer.Println("-> Cloning", repo)
-			_, err = git.Clone(repo)
+			if _, err := os.Stat(repo); err == nil {
+				return // already present
+			}
+			remote, err := git.ModuleRemote(cfg.Origin, cfg.RepoSuffix, repo)
+			if err != nil {
+				errCh <- errorFmt(repo, err)
+				return
+			}
+			m.Printer.Println("-> Cloning", remote, "into", repo)
+			_, err = git.Clone(remote, repo)
 			if err != nil {
 				errCh <- errorFmt(repo, err)
 				return

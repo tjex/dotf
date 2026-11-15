@@ -20,6 +20,7 @@ type Config struct {
 	Worktree           string
 	GitDir             string `toml:"git-dir"`
 	Origin             string
+	RepoSuffix         string `toml:"repo-suffix"`
 	RepoFlags          []string // Flags for bare repo dir and worktree
 	BatchCommitMessage string   `toml:"batch-commit-message"`
 	Concurrency        struct {

@@ -3,6 +3,8 @@ package git
 import (
 	"fmt"
 	"os/exec"
+	"path/filepath"
+	"strings"
 
 	"git.sr.ht/~tjex/dotf/internal/config"
 	"git.sr.ht/~tjex/dotf/internal/proc"
@@ -53,8 +55,26 @@ func UncommittedChanges(repo, worktree string) (bool, error) {
 	return len(out) > 0, nil
 }
 
-func Clone(repo string) (string, error) {
-	return RepoCmdRoutine(repo, "clone")
+// Clone clones url into dest. Missing parent directories are created by git.
+func Clone(url, dest string) (string, error) {
+	return proc.Output("git", []string{"clone", url, dest})
+}
+
+// ModuleRemote derives a module's remote URL from the bare repo's origin.
+// The origin's last path segment (the bare repo name) is replaced by the
+// module directory name plus suffix, e.g.
+// ("git@git.sr.ht:~me/dotfiles", "-rc", "~/.config/nvim") -> "git@git.sr.ht:~me/nvim-rc".
+func ModuleRemote(origin, suffix, modulePath string) (string, error) {
+	origin = strings.TrimRight(origin, "/")
+	i := strings.LastIndexAny(origin, "/:")
+	if i < 0 {
+		return "", fmt.Errorf("cannot derive module remote from origin %q", origin)
+	}
+	name := filepath.Base(filepath.Clean(modulePath))
+	if name == "." || name == "/" {
+		return "", fmt.Errorf("cannot derive repository name from %q", modulePath)
+	}
+	return origin[:i+1] + name + suffix, nil
 }
 
 func Push(repo string) (string, error) {
