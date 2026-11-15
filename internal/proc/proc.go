@@ -1,4 +1,4 @@
-package cmd
+package proc
 
 import (
 	"bytes"
@@ -10,26 +10,26 @@ import (
 	"strings"
 )
 
-// Return an instance of cmd for the calling function to call .Run()
-func Cmd(prog string, args []string) *exec.Cmd {
+// Stream returns a command wired to the terminal for the caller to .Run().
+func Stream(prog string, args []string) *exec.Cmd {
 	cmd := exec.Command(prog, args...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd
 }
-	
 
-// A regular exec.Command but that returns stdout as string.
-// Returns: (stdout string, err error)
-func CmdRoutine(prog string, args []string) (string, error) {
+// Output runs a command and returns its stdout as a string.
+func Output(prog string, args []string) (string, error) {
 	var outStd bytes.Buffer
 	var outErr bytes.Buffer
 	cmd := exec.Command(prog, args...)
 	cmd.Stdout = &outStd
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = &outErr
-	cmd.Run()
+	if err := cmd.Run(); err != nil && cmd.ProcessState == nil {
+		return "", err
+	}
 	// Git prints normal info to stderr, so check if command is of type
 	// [ExitError] to verify it was an actual error.
 	if exitError, ok := cmd.ProcessState.Sys().(interface{ ExitStatus() int }); ok {
@@ -41,8 +41,8 @@ func CmdRoutine(prog string, args []string) (string, error) {
 	return outStd.String(), nil
 }
 
-// Run fzf by piping arguments.
-func CmdFzf(pipeInput []string) (string, error) {
+// Fzf runs fzf by piping arguments.
+func Fzf(pipeInput []string) (string, error) {
 	// deconstruct slice into what fzf sees as a list
 	var pipeString string
 	for i, val := range pipeInput {
@@ -87,8 +87,8 @@ func CmdFzf(pipeInput []string) (string, error) {
 
 }
 
-// open a file or directory with $EDITOR (defaults to vim if no $EDITOR found)
-func CmdEditor(path string) {
+// Editor opens a file or directory with $EDITOR (defaults to vim if no $EDITOR found)
+func Editor(path string) {
 	var editor, found = os.LookupEnv("EDITOR")
 	if !found {
 		fmt.Println("No $EDITOR environment variable found, defaulting to vim")
@@ -109,6 +109,4 @@ func CmdEditor(path string) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	cmd.Run()
-
 }

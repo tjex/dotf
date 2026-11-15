@@ -4,42 +4,35 @@ import (
 	"fmt"
 	"os/exec"
 
-	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/internal/config"
+	"git.sr.ht/~tjex/dotf/internal/proc"
 )
 
 // Base helper to run a git command with -C <repo> automatically
 func RepoCmd(repo string, args ...string) *exec.Cmd {
 	fullArgs := append([]string{"-C", repo}, args...)
-	return cmd.Cmd("git", fullArgs)
+	return proc.Stream("git", fullArgs)
 }
 
 func RepoCmdRoutine(repo string, args ...string) (string, error) {
 	fullArgs := append([]string{"-C", repo}, args...)
-	return cmd.CmdRoutine("git", fullArgs)
+	return proc.Output("git", fullArgs)
 }
 
-// Full error-returning helper
+// Plain git command with no repo flags
 func Cmd(args []string) *exec.Cmd {
-	return cmd.Cmd("git", args)
+	return proc.Stream("git", args)
 }
 
 // Git command with flags set as per the user's config
 func Dotf(args []string) *exec.Cmd {
 	bareRepoArgs := buildArgsArray(args)
-	return cmd.Cmd("git", bareRepoArgs)
-}
-
-// Git command with flags set as per the user's config
-func DotfInstance(args []string) *exec.Cmd {
-	bareRepoArgs := buildArgsArray(args)
-	return cmd.Cmd("git", bareRepoArgs)
+	return proc.Stream("git", bareRepoArgs)
 }
 
 // Returns whether local branch wants a pull/push
 func SyncState(repo string) (bool, bool, error) {
-	cmd := RepoCmd(repo, "fetch", "--quiet")
-	cmd.Run()
+	RepoCmd(repo, "fetch", "--quiet").Run()
 
 	out, err := RepoCmdRoutine(repo, "rev-list", "--left-right", "--count", "@{upstream}...HEAD")
 	if err != nil {
@@ -53,11 +46,15 @@ func SyncState(repo string) (bool, bool, error) {
 }
 
 func UncommittedChanges(repo, worktree string) (bool, error) {
-	out, err := cmd.CmdRoutine("git", []string{"-C", repo, "--work-tree", worktree, "status", "--porcelain"})
+	out, err := proc.Output("git", []string{"-C", repo, "--work-tree", worktree, "status", "--porcelain"})
 	if err != nil {
 		return false, err
 	}
 	return len(out) > 0, nil
+}
+
+func Clone(repo string) (string, error) {
+	return RepoCmdRoutine(repo, "clone")
 }
 
 func Push(repo string) (string, error) {

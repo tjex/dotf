@@ -18,23 +18,17 @@ type Sync struct {
 	Cmd     *SyncCmd
 }
 
-func (s *Sync) Run(printer *printer.Printer) error {
-
-	s.Printer = printer
-	var err error
-
+func (s *Sync) Run() error {
 	switch {
 	case s.Cmd.SyncAll:
-		err = s.syncAll()
+		return s.syncAll()
 	case s.Cmd.SyncBare:
-		err = s.syncBare()
+		return s.syncBare()
 	case s.Cmd.SyncModules:
-		err = s.syncModules()
+		return s.syncModules()
 	default:
 		return errors.New("No flag passed to sync.")
 	}
-
-	return err
 }
 
 func (s *Sync) syncAll() error {
@@ -53,39 +47,19 @@ func (s *Sync) syncAll() error {
 
 func (s *Sync) syncBare() error {
 	s.Printer.Println("Syncing bare repository...")
-	bare := dotf.Bare{Printer: s.Printer}
-	err := bare.Sync(s.Printer)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	bare := &dotf.Bare{Printer: s.Printer}
+	return bare.Sync()
 }
 
 func (s *Sync) syncModules() error {
 	s.Printer.Println("Syncing modules...")
-	pull := &dotf.ModuleCmd{Pull: true}
-	prime := &dotf.ModuleCmd{Prime: true}
-	push := &dotf.ModuleCmd{Push: true}
-	module := &dotf.Modules{Printer: s.Printer}
+	modules := &dotf.Modules{Printer: s.Printer}
 
-	module.Cmd = pull
-	err := module.Run(s.Printer)
-	if err != nil {
+	if err := modules.Pull(); err != nil {
 		return err
 	}
-
-	module.Cmd = prime
-	err = module.Run(s.Printer)
-	if err != nil {
+	if err := modules.Prime(); err != nil {
 		return err
 	}
-
-	module.Cmd = push
-	err = module.Run(s.Printer)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return modules.Push()
 }

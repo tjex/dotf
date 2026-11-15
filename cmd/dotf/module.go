@@ -7,10 +7,10 @@ import (
 	"strings"
 	"sync"
 
-	"git.sr.ht/~tjex/dotf/cmd"
 	"git.sr.ht/~tjex/dotf/internal/config"
 	"git.sr.ht/~tjex/dotf/internal/git"
 	"git.sr.ht/~tjex/dotf/internal/printer"
+	"git.sr.ht/~tjex/dotf/internal/proc"
 	"git.sr.ht/~tjex/dotf/internal/util"
 )
 
@@ -25,6 +25,7 @@ type ModuleCmd struct {
 	Pull   bool `arg:"--pull" default:"false" help:"pulls all modules from their remotes."`
 	List   bool `arg:"-l,--list" default:"false" help:"list all tracked modules"`
 	Edit   bool `arg:"-e, --edit" default:"false" help:"cd into selected module via fzf"`
+	Clone  bool `arg:"-c, --clone" default:"false" help:"clone modules from default and env groups"`
 }
 
 type Modules struct {
@@ -55,32 +56,33 @@ func getModulePaths() []string {
 	return paths
 }
 
-func (m *Modules) Run(printer *printer.Printer) error {
-	m.Printer = printer
-	var err error
+// Run dispatches the flag set on m.Cmd. Other callers should use the
+// exported methods directly.
+func (m *Modules) Run() error {
 	switch {
 	case m.Cmd.Status:
-		m.status()
+		return m.Status()
 	case m.Cmd.Prime:
-		err = m.prime()
+		return m.Prime()
 	case m.Cmd.Push:
-		err = m.push()
+		return m.Push()
 	case m.Cmd.Pull:
-		err = m.pull()
+		return m.Pull()
 	case m.Cmd.List:
-		err = list()
+		return m.List()
+	case m.Cmd.Clone:
+		return m.Clone()
 	case m.Cmd.Edit:
-		edit()
+		return m.Edit()
 	default:
 		return errors.New("No flag provided to module command.")
 	}
-	return err
 }
 
-// Add and commit any unstaged changes in all modules.
+// Prime adds and commits any unstaged changes in all modules.
 // There's not real need to check if the repo is dirty. The failure is quick and
 // has no side effects.
-func (m *Modules) prime() error {
+func (m *Modules) Prime() error {
 	message := &cfg.BatchCommitMessage
 	paths := getModulePaths()
 
@@ -129,8 +131,8 @@ func (m *Modules) prime() error {
 	return nil
 }
 
-// Push modules to their remotes in parallel.
-func (m *Modules) push() error {
+// Push pushes modules to their remotes in parallel.
+func (m *Modules) Push() error {
 	paths := getModulePaths()
 	batchSize := cfg.Concurrency.BatchSize
 
@@ -180,8 +182,8 @@ func (m *Modules) push() error {
 	return nil
 }
 
-// Pull modules from their remotes in parallel.
-func (m *Modules) pull() error {
+// Pull pulls modules from their remotes in parallel.
+func (m *Modules) Pull() error {
 	paths := getModulePaths()
 	batchSize := cfg.Concurrency.BatchSize
 
@@ -226,7 +228,7 @@ func (m *Modules) pull() error {
 	return nil
 }
 
-func (m *Modules) status() error {
+func (m *Modules) Status() error {
 	pathsReceived := getModulePaths()
 
 	var wg sync.WaitGroup
@@ -266,13 +268,10 @@ func (m *Modules) status() error {
 	return nil
 }
 
-// Return paths to all submodules
-func list() error {
+// List prints the paths of all modules.
+func (m *Modules) List() error {
 	pathsReceived := getModulePaths()
-	var paths []string
-	for _, path := range pathsReceived {
-		paths = append(paths, path)
-	}
+	paths := append([]string(nil), pathsReceived...)
 	sort.Strings(paths)
 	for _, path := range paths {
 		absPath, err := util.ExpandPath(path)
@@ -285,31 +284,61 @@ func list() error {
 
 }
 
-func edit() {
-	// get submodule paths
-	var paths []string
-	pathsReceived := getModulePaths()
-	for _, p := range pathsReceived {
-		paths = append(paths, p)
-	}
-
+// Edit selects a module via fzf and opens it in $EDITOR.
+func (m *Modules) Edit() error {
+	paths := getModulePaths()
 	sort.Strings(paths)
-	// return choice from fzf selection
-	var choice, err = cmd.CmdFzf(paths)
 
-	// exit quietly if fzf process is cancelled
-	if err != nil && strings.Contains(err.Error(), "exit status 130") {
-		return
-	}
-
-	// if there's actually an error, print it and exit quietly.
+	choice, err := proc.Fzf(paths)
 	if err != nil {
-		fmt.Println(err)
-		return
+		// fzf exits with 130 when cancelled
+		if strings.Contains(err.Error(), "exit status 130") {
+			return nil
+		}
+		return err
 	}
+
 	choice, err = util.ExpandPath(choice)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
-	cmd.CmdEditor(choice)
+	proc.Editor(choice)
+	return nil
+}
+
+func (m *Modules) Clone() error {
+	paths := getModulePaths()
+
+	var wg sync.WaitGroup
+	errCh := make(chan error, len(paths)) // buffered to avoid goroutine blocking
+
+	for _, p := range paths {
+		wg.Add(1)
+
+		go func(p string) {
+			defer wg.Done()
+			repo, err := util.ExpandPath(p)
+			if err != nil {
+				errCh <- errorFmt(repo, err)
+				return
+			}
+			m.Printer.Println("-> Cloning", repo)
+			_, err = git.Clone(repo)
+			if err != nil {
+				errCh <- errorFmt(repo, err)
+				return
+			}
+		}(p)
+
+	}
+
+	wg.Wait()
+	close(errCh)
+
+	for err := range errCh {
+		return err
+	}
+
+	return nil
+
 }

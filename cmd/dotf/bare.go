@@ -10,9 +10,7 @@ type Bare struct {
 	Printer *printer.Printer
 }
 
-func (b *Bare) Sync(printer *printer.Printer) error {
-	b.Printer = printer
-
+func (b *Bare) Sync() error {
 	bareRepo, err := util.ExpandPath(cfg.GitDir)
 	if err != nil {
 		return err
@@ -64,6 +62,18 @@ func (b *Bare) Sync(printer *printer.Printer) error {
 		if err := cmd.Run(); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func (b *Bare) Clone() error {
+	bareRepo, err := util.ExpandPath(cfg.GitDir)
+	if err != nil {
+		return err
+	}
+	cmd := git.Dotf([]string{"clone", "--bare", cfg.Origin, bareRepo})
+	if err := cmd.Run(); err != nil {
+		return err
 	}
 	return nil
 }
