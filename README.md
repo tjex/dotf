@@ -16,16 +16,17 @@ with a bare git repostiory is new to you.
 ```toml
 env = "example" # or `export DOTF_ENV=example` in shell config.
 worktree = "${HOME}" # the bare repo's root directory (all files deeper can be tracked).
-gitdir = "~/.cfg/" # the location of the bare repo git directory (i.e, git config, hooks, etc).
+git-dir = "~/.cfg/" # the location of the bare repo git directory (i.e, git config, hooks, etc).
 origin = "<read+write url for origin>" # eg, git@yourhost.com:user/dotfiles.
+repo-suffix = "-rc" # appended to a module's directory name to get its repository name.
 batch-commit-message = "batch dotf update" # used by `dotf m --prime` for module commit message.
 
 [concurrency]
-batch-size = 15 # How many concurrent git operations to run per batch. 
+batch-size = 15 # How many concurrent git operations to run per batch.
                 # This helps if your git host rate limits or otherwise restricts your connections.
 
 [modules.default]
-paths = ["~/path/to/repo1", "~/path/to/repo2"]
+paths = ["~/path/to/repo1", { path = "~/path/to/repo2", repository = "repo2-rc" }]
 ```
 
 ## Installation
@@ -85,12 +86,42 @@ Submodules are still available for you to use as normal if you prefer:
 `dotf submodule add ...`, etc. As all Git commands apart from those intercepted
 in this program are _passed to your bare dotfiles Git repository_.
 
+### Module remotes and cloning
+
+`dotf m --clone` (or `dotf clone --modules`) clones every module that does not
+yet exist on disk. Each module's remote is derived from `origin`: the last
+element of `origin` (the bare repo name) is replaced by the module's repository
+name.
+
+A module entry in `paths` is either a plain string or an object:
+
+```toml
+origin = "git@git.sr.ht:~me/dotfiles"
+repo-suffix = "-rc"
+
+[modules.default]
+paths = [
+  "~/.config/nvim",                                                   # -> git@git.sr.ht:~me/nvim-rc
+  { path = "~/.config/tmux" },                                        # -> git@git.sr.ht:~me/tmux-rc
+  { path = "~/.config/task", repository = "task-config-rc" },         # -> git@git.sr.ht:~me/task-config-rc
+  { path = "~/.local/share/task", repository = "task-data-rc" },      # -> git@git.sr.ht:~me/task-data-rc
+]
+```
+
+- Without `repository`, the name is the path's last element plus `repo-suffix`.
+- With `repository`, the name is used exactly as written. `repo-suffix` is _not_
+  appended.
+- Set `repository` whenever two modules share a last path element (like the two
+  `task` directories above), otherwise they would map to the same remote.
+- Modules are expected to be hosted next to the bare repository, as `origin`
+  provides the host and user.
+- `path` is required in an object.
+
 ## Usage
 
 All `git` commands are passed as normal. Some are intercepted and handled
 differently, some are unique. `dotf m ...` commands range over module paths in
 your `config.toml`, and run as goroutines:
-
 
 ### Modules
 
@@ -113,6 +144,9 @@ dotf m --prime
 
 # Push local changes of all modules
 dotf m --push
+
+# Clone modules missing on disk (remote derived from origin, see above)
+dotf m --clone
 ```
 
 ### Bare Repo
@@ -123,6 +157,19 @@ dotf pull
 
 # Push bare dotfiles repository to origin
 dotf push
+```
+
+### Clone
+
+```bash
+# Clone the bare repository from origin
+dotf clone --bare
+
+# Clone all modules missing on disk
+dotf clone --modules
+
+# Clone both
+dotf clone --all
 ```
 
 ### Sync
