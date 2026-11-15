@@ -251,8 +251,7 @@ func (m *Modules) status() error {
 			}
 
 			if report != "" {
-				m.Printer.Println("Changes in", repo+":")
-				m.Printer.Println(report)
+				m.Printer.Println("Changes in", repo+":", "\n", report)
 			}
 		}(p)
 	}
