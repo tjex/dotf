@@ -79,6 +79,9 @@ func (b *Bare) Clone() error {
 	if err := cmd.Run(); err != nil {
 		return err
 	}
+	if err := git.Dotf([]string{"config", "--local", "status.showUntrackedFiles", "no"}).Run(); err != nil {
+		return err
+	}
 	if b.Branch == "" {
 		return nil
 	}
