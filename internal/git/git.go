@@ -71,6 +71,28 @@ func Clone(url, dest string) (string, error) {
 	return proc.Output("git", []string{"clone", url, dest})
 }
 
+// BranchExists reports whether branch exists in repo as a local branch or as
+// a branch on origin.
+func BranchExists(repo, branch string) bool {
+	return branchExists([]string{"-C", repo}, branch)
+}
+
+// BareBranchExists is BranchExists for a bare repository, which git only
+// accepts when given explicitly via --git-dir.
+func BareBranchExists(gitDir, branch string) bool {
+	return branchExists([]string{"--git-dir", gitDir}, branch)
+}
+
+func branchExists(base []string, branch string) bool {
+	for _, ref := range []string{"refs/heads/", "refs/remotes/origin/"} {
+		args := append(append([]string{}, base...), "rev-parse", "--verify", "--quiet", ref+branch)
+		if _, err := proc.Output("git", args); err == nil {
+			return true
+		}
+	}
+	return false
+}
+
 // ModuleRemote derives a module's remote URL from the bare repo's origin.
 // The origin's last path segment (the bare repo name) is replaced by the
 // repository name. A repository that is a full URL is returned unchanged.

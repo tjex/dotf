@@ -172,6 +172,9 @@ dotf clone --bare
 # Clone all modules missing on disk
 dotf clone --modules
 
+# Clone the default branch, then check out <name> (works with --bare, --modules and --all)
+dotf clone --modules --branch server
+
 # Clone both
 dotf clone --all
 ```

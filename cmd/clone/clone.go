@@ -8,9 +8,10 @@ import (
 )
 
 type CloneCmd struct {
-	CloneAll     bool `arg:"-a,--all" help:"Clone both the bare repository and all modules."`
-	CloneBare    bool `arg:"-b,--bare" help:"Clone the bare repository."`
-	CloneModules bool `arg:"-m,--modules" help:"Clone all modules."`
+	CloneAll     bool   `arg:"-a,--all" help:"Clone both the bare repository and all modules."`
+	CloneBare    bool   `arg:"-b,--bare" help:"Clone the bare repository."`
+	CloneModules bool   `arg:"-m,--modules" help:"Clone all modules."`
+	Branch       string `arg:"--branch" help:"Branch to check out in the bare repository and each cloned module (after cloning the default branch)."`
 }
 
 type Clone struct {
@@ -47,12 +48,12 @@ func (c *Clone) cloneAll() error {
 
 func (c *Clone) cloneBare() error {
 	c.Printer.Println("Cloning bare repository...")
-	bare := &dotf.Bare{Printer: c.Printer}
+	bare := &dotf.Bare{Printer: c.Printer, Branch: c.Cmd.Branch}
 	return bare.Clone()
 }
 
 func (c *Clone) cloneModules() error {
 	c.Printer.Println("Cloning modules...")
-	modules := &dotf.Modules{Printer: c.Printer}
+	modules := &dotf.Modules{Printer: c.Printer, Branch: c.Cmd.Branch}
 	return modules.Clone()
 }

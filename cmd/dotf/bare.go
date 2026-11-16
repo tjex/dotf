@@ -1,6 +1,9 @@
 package dotf
 
 import (
+	"fmt"
+	"os"
+
 	"git.sr.ht/~tjex/dotf/internal/git"
 	"git.sr.ht/~tjex/dotf/internal/printer"
 	"git.sr.ht/~tjex/dotf/internal/util"
@@ -8,6 +11,7 @@ import (
 
 type Bare struct {
 	Printer *printer.Printer
+	Branch  string // branch to check out after cloning; empty keeps the default
 }
 
 func (b *Bare) Sync() error {
@@ -75,5 +79,13 @@ func (b *Bare) Clone() error {
 	if err := cmd.Run(); err != nil {
 		return err
 	}
-	return nil
+	if b.Branch == "" {
+		return nil
+	}
+	if !git.BareBranchExists(bareRepo, b.Branch) {
+		fmt.Fprintf(os.Stderr, "Branch %s does not exist in repo %s. Cloned the default branch.\n", b.Branch, bareRepo)
+		return nil
+	}
+	b.Printer.Println("-> Checking out", b.Branch, "in", bareRepo)
+	return git.Dotf([]string{"checkout", b.Branch}).Run()
 }

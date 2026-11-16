@@ -47,20 +47,18 @@ func main() {
 	printer := printer.NewPrinter(args.Quiet)
 	err = p.Parse(stdinArgs)
 	var runner interface{ Run() error }
-	var name string
 	switch {
 	case args.SyncCmd != nil:
-		runner, name = &sync.Sync{Printer: printer, Cmd: args.SyncCmd}, "sync"
+		runner = &sync.Sync{Printer: printer, Cmd: args.SyncCmd}
 	case args.CloneCmd != nil:
-		runner, name = &clone.Clone{Printer: printer, Cmd: args.CloneCmd}, "clone"
+		runner = &clone.Clone{Printer: printer, Cmd: args.CloneCmd}
 	case args.ModuleCmd != nil:
-		runner, name = &dotf.Modules{Printer: printer, Cmd: args.ModuleCmd}, "m"
+		runner = &dotf.Modules{Printer: printer, Cmd: args.ModuleCmd}
 	}
 
 	if runner != nil {
 		if err := runner.Run(); err != nil {
 			printer.Println(fmt.Sprintf("Error: %v", err))
-			p.WriteHelpForSubcommand(os.Stdout, name)
 		}
 		return
 	}

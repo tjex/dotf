@@ -32,6 +32,7 @@ type ModuleCmd struct {
 type Modules struct {
 	Printer *printer.Printer
 	Cmd     *ModuleCmd
+	Branch  string // branch to check out after cloning; empty keeps the default
 }
 
 func errorFmt(repoPath string, err error) error {
@@ -312,6 +313,8 @@ func (m *Modules) Edit() error {
 	return nil
 }
 
+// Clone clones every module missing on disk. If m.Branch is set, it is checked
+// out in each module after the default branch is cloned.
 func (m *Modules) Clone() error {
 	modules := getModules()
 
@@ -337,13 +340,22 @@ func (m *Modules) Clone() error {
 				return
 			}
 			m.Printer.Println("-> Cloning", remote, "into", repo)
-			_, err = git.Clone(remote, repo)
-			if err != nil {
+			if _, err := git.Clone(remote, repo); err != nil {
 				errCh <- errorFmt(repo, err)
 				return
 			}
+			if m.Branch == "" {
+				return
+			}
+			if !git.BranchExists(repo, m.Branch) {
+				fmt.Fprintf(os.Stderr, "Branch %s does not exist in repo %s. Cloned the default branch.\n", m.Branch, repo)
+				return
+			}
+			m.Printer.Println("-> Checking out", m.Branch, "in", repo)
+			if _, err := git.RepoCmdRoutine(repo, "checkout", m.Branch); err != nil {
+				errCh <- errorFmt(repo, err)
+			}
 		}(mod)
-
 	}
 
 	wg.Wait()
@@ -354,5 +366,4 @@ func (m *Modules) Clone() error {
 	}
 
 	return nil
-
 }
