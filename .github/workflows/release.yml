@@ -21,6 +21,21 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Extract release notes
+        run: |
+          if ! awk -v version="$VERSION" '
+            /^## / {
+              if (found) exit
+              found = ($0 == "## " version)
+              next
+            }
+            found { print }
+            END { if (!found) exit 1 }
+          ' CHANGELOG.md > "$RUNNER_TEMP/release-notes.md"; then
+            echo "No changelog entry for $VERSION" >&2
+            exit 1
+          fi
+
       - name: Build release archives
         run: |
           mkdir -p dist "$RUNNER_TEMP/dotf-release"
@@ -42,4 +57,4 @@ jobs:
           gh release create "$VERSION" dist/*.tar.gz \
             --verify-tag \
             --title "$VERSION" \
-            --generate-notes
+            --notes-file "$RUNNER_TEMP/release-notes.md"
