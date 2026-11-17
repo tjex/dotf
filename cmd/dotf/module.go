@@ -320,12 +320,15 @@ func (m *Modules) Clone() error {
 
 	var wg sync.WaitGroup
 	errCh := make(chan error, len(modules)) // buffered to avoid goroutine blocking
+	sem := make(chan struct{}, cfg.Concurrency.BatchSize)
 
 	for _, mod := range modules {
 		wg.Add(1)
+		sem <- struct{}{}
 
 		go func(mod config.Module) {
 			defer wg.Done()
+			defer func() { <-sem }()
 			repo, err := util.ExpandPath(mod.Path)
 			if err != nil {
 				errCh <- errorFmt(repo, err)
