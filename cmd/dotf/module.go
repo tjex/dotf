@@ -36,8 +36,7 @@ type Modules struct {
 }
 
 func errorFmt(repoPath string, err error) error {
-	e := fmt.Sprintf("(%s) %v", repoPath, err)
-	return errors.New(e)
+	return fmt.Errorf("(%s) %w", repoPath, err)
 }
 
 func getModules() []config.Module {
@@ -104,7 +103,7 @@ func (m *Modules) Prime() error {
 
 			repo, err := util.ExpandPath(p)
 			if err != nil {
-				errCh <- errorFmt(repo, err)
+				errCh <- errorFmt(p, err)
 				return
 			}
 
@@ -132,10 +131,11 @@ func (m *Modules) Prime() error {
 	wg.Wait()
 	close(errCh)
 
+	var errs []error
 	for err := range errCh {
-		return err
+		errs = append(errs, err)
 	}
-	return nil
+	return errors.Join(errs...)
 }
 
 // Push pushes modules to their remotes in parallel.
@@ -158,7 +158,7 @@ func (m *Modules) Push() error {
 
 			repo, err := util.ExpandPath(p)
 			if err != nil {
-				errCh <- errorFmt(repo, err)
+				errCh <- errorFmt(p, err)
 				return
 			}
 
@@ -182,11 +182,11 @@ func (m *Modules) Push() error {
 	wg.Wait()
 	close(errCh)
 
+	var errs []error
 	for err := range errCh {
-		return err
+		errs = append(errs, err)
 	}
-
-	return nil
+	return errors.Join(errs...)
 }
 
 // Pull pulls modules from their remotes in parallel.
@@ -207,7 +207,7 @@ func (m *Modules) Pull() error {
 			defer func() { <-sem }()
 			repo, err := util.ExpandPath(p)
 			if err != nil {
-				errCh <- errorFmt(repo, err)
+				errCh <- errorFmt(p, err)
 				return
 			}
 			wantsPull, _, err := git.SyncState(repo)
@@ -228,11 +228,11 @@ func (m *Modules) Pull() error {
 	wg.Wait()
 	close(errCh)
 
+	var errs []error
 	for err := range errCh {
-		return err
+		errs = append(errs, err)
 	}
-
-	return nil
+	return errors.Join(errs...)
 }
 
 func (m *Modules) Status() error {
@@ -249,7 +249,7 @@ func (m *Modules) Status() error {
 
 			repo, err := util.ExpandPath(p)
 			if err != nil {
-				errCh <- errorFmt(repo, err)
+				errCh <- errorFmt(p, err)
 				return
 			}
 
@@ -268,11 +268,11 @@ func (m *Modules) Status() error {
 	wg.Wait()
 	close(errCh)
 
+	var errs []error
 	for err := range errCh {
-		return err
+		errs = append(errs, err)
 	}
-
-	return nil
+	return errors.Join(errs...)
 }
 
 // List prints the paths of all modules.
@@ -331,7 +331,7 @@ func (m *Modules) Clone() error {
 			defer func() { <-sem }()
 			repo, err := util.ExpandPath(mod.Path)
 			if err != nil {
-				errCh <- errorFmt(repo, err)
+				errCh <- errorFmt(mod.Path, err)
 				return
 			}
 			if _, err := os.Stat(repo); err == nil {
@@ -364,9 +364,9 @@ func (m *Modules) Clone() error {
 	wg.Wait()
 	close(errCh)
 
+	var errs []error
 	for err := range errCh {
-		return err
+		errs = append(errs, err)
 	}
-
-	return nil
+	return errors.Join(errs...)
 }

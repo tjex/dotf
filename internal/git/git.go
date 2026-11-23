@@ -1,10 +1,14 @@
 package git
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"git.sr.ht/~tjex/dotf/internal/config"
 	"git.sr.ht/~tjex/dotf/internal/proc"
@@ -32,9 +36,93 @@ func Dotf(args []string) *exec.Cmd {
 	return proc.Stream("git", bareRepoArgs)
 }
 
+// RunDotf streams Git diagnostics with repository context, including prompts.
+func RunDotf(args []string) error {
+	cmd := Dotf(args)
+	stderr := &repoWriter{repo: config.UserConfig().GitDir, lineStart: true}
+	cmd.Stderr = stderr
+	err := cmd.Run()
+	stderr.finish()
+	return err
+}
+
+type repoWriter struct {
+	repo      string
+	lineStart bool
+}
+
+var (
+	stderrMu   sync.Mutex
+	stderrLast *repoWriter
+)
+
+func (w *repoWriter) Write(p []byte) (int, error) {
+	stderrMu.Lock()
+	defer stderrMu.Unlock()
+
+	if stderrLast != nil && stderrLast != w {
+		if _, err := fmt.Fprintln(os.Stderr); err != nil {
+			return 0, err
+		}
+		stderrLast.lineStart = true
+		stderrLast = nil
+	}
+
+	written := 0
+	for len(p) > 0 {
+		if w.lineStart {
+			if _, err := fmt.Fprintf(os.Stderr, "(%s) ", w.repo); err != nil {
+				return written, err
+			}
+			w.lineStart = false
+		}
+		end := bytes.IndexByte(p, '\n') + 1
+		if end == 0 {
+			end = len(p)
+		}
+		n, err := os.Stderr.Write(p[:end])
+		written += n
+		if err != nil {
+			return written, err
+		}
+		if n != end {
+			return written, io.ErrShortWrite
+		}
+		w.lineStart = p[end-1] == '\n'
+		if w.lineStart {
+			stderrLast = nil
+		} else {
+			stderrLast = w
+		}
+		p = p[end:]
+	}
+	return written, nil
+}
+
+func (w *repoWriter) finish() {
+	stderrMu.Lock()
+	defer stderrMu.Unlock()
+	if stderrLast == w {
+		_, _ = fmt.Fprintln(os.Stderr)
+		w.lineStart = true
+		stderrLast = nil
+	}
+}
+
 // Returns whether local branch wants a pull/push
 func SyncState(repo string) (bool, bool, error) {
-	RepoCmd(repo, "fetch", "--quiet").Run()
+	cmd := RepoCmd(repo, "fetch", "--quiet")
+	var stderr bytes.Buffer
+	writer := &repoWriter{repo: repo, lineStart: true}
+	cmd.Stderr = io.MultiWriter(writer, &stderr)
+	err := cmd.Run()
+	writer.finish()
+	if err != nil {
+		if message := strings.TrimSpace(stderr.String()); message != "" {
+			return false, false, fmt.Errorf("%s: %w", message, err)
+		}
+		return false, false, err
+	}
 
 	out, err := RepoCmdRoutine(repo, "rev-list", "--left-right", "--count", "@{upstream}...HEAD")
 	if err != nil {

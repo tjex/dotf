@@ -14,7 +14,12 @@ type Bare struct {
 	Branch  string // branch to check out after cloning; empty keeps the default
 }
 
-func (b *Bare) Sync() error {
+func (b *Bare) Sync() (err error) {
+	defer func() {
+		if err != nil {
+			err = errorFmt(cfg.GitDir, err)
+		}
+	}()
 	bareRepo, err := util.ExpandPath(cfg.GitDir)
 	if err != nil {
 		return err
@@ -31,14 +36,12 @@ func (b *Bare) Sync() error {
 	}
 
 	if wantsPull {
-		cmd := git.Dotf([]string{"pull"})
-		if err := cmd.Run(); err != nil {
+		if err := git.RunDotf([]string{"pull"}); err != nil {
 			return err
 		}
 	}
 
-	cmd := git.Dotf([]string{"add", "-u"}) // add doesnt have a --quiet flag
-	if err := cmd.Run(); err != nil {
+	if err := git.RunDotf([]string{"add", "-u"}); err != nil {
 		return err
 	}
 
@@ -50,8 +53,7 @@ func (b *Bare) Sync() error {
 	if dirty {
 		b.Printer.Println("-> Committing changes.")
 		message := &cfg.BatchCommitMessage
-		cmd := git.Dotf([]string{"commit", "-m", *message})
-		if err := cmd.Run(); err != nil {
+		if err := git.RunDotf([]string{"commit", "-m", *message}); err != nil {
 			return err
 		}
 	}
@@ -62,24 +64,27 @@ func (b *Bare) Sync() error {
 	}
 	if wantsPush {
 		b.Printer.Println("-> Pushing.")
-		cmd := git.Dotf([]string{"push"})
-		if err := cmd.Run(); err != nil {
+		if err := git.RunDotf([]string{"push"}); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (b *Bare) Clone() error {
+func (b *Bare) Clone() (err error) {
+	defer func() {
+		if err != nil {
+			err = errorFmt(cfg.GitDir, err)
+		}
+	}()
 	bareRepo, err := util.ExpandPath(cfg.GitDir)
 	if err != nil {
 		return err
 	}
-	cmd := git.Dotf([]string{"clone", "--bare", cfg.Origin, bareRepo})
-	if err := cmd.Run(); err != nil {
+	if err := git.RunDotf([]string{"clone", "--bare", cfg.Origin, bareRepo}); err != nil {
 		return err
 	}
-	if err := git.Dotf([]string{"config", "--local", "status.showUntrackedFiles", "no"}).Run(); err != nil {
+	if err := git.RunDotf([]string{"config", "--local", "status.showUntrackedFiles", "no"}); err != nil {
 		return err
 	}
 	if b.Branch == "" {
@@ -90,5 +95,5 @@ func (b *Bare) Clone() error {
 		return nil
 	}
 	b.Printer.Println("-> Checking out", b.Branch, "in", bareRepo)
-	return git.Dotf([]string{"checkout", b.Branch}).Run()
+	return git.RunDotf([]string{"checkout", b.Branch})
 }

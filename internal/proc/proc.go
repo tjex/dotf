@@ -2,7 +2,6 @@ package proc
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -27,15 +26,11 @@ func Output(prog string, args []string) (string, error) {
 	cmd.Stdout = &outStd
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = &outErr
-	if err := cmd.Run(); err != nil && cmd.ProcessState == nil {
-		return "", err
-	}
-	// Git prints normal info to stderr, so check if command is of type
-	// [ExitError] to verify it was an actual error.
-	if exitError, ok := cmd.ProcessState.Sys().(interface{ ExitStatus() int }); ok {
-		if exitError.ExitStatus() != 0 {
-			return "", errors.New(outErr.String())
+	if err := cmd.Run(); err != nil {
+		if message := strings.TrimSpace(outErr.String()); message != "" {
+			return "", fmt.Errorf("%s: %w", message, err)
 		}
+		return "", err
 	}
 
 	return outStd.String(), nil

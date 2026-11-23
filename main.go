@@ -44,8 +44,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	printer := printer.NewPrinter(args.Quiet)
 	err = p.Parse(stdinArgs)
+	printer := printer.NewPrinter(args.Quiet)
 	var runner interface{ Run() error }
 	switch {
 	case args.SyncCmd != nil:
@@ -58,7 +58,7 @@ func main() {
 
 	if runner != nil {
 		if err := runner.Run(); err != nil {
-			printer.Println(fmt.Sprintf("Error: %v", err))
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		}
 		return
 	}
