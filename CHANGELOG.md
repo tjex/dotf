@@ -1,5 +1,9 @@
 # dotf Changelog
 
+## v0.6.5
+
+- Clearer error logging (include repo path inline with error)
+
 ## v0.6.4
 
 - Add a GitHub Actions workflow to publish Linux and macOS binaries for amd64 and
